@@ -8,44 +8,64 @@ import { useRouter } from "next/navigation"
 
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(false) // Start with loading false to show page immediately
+  const [loading, setLoading] = useState(false)
   const [supabaseAvailable, setSupabaseAvailable] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if Supabase environment variables are available
         if (
           typeof window !== "undefined" &&
           process.env.NEXT_PUBLIC_SUPABASE_URL &&
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
         ) {
-          // Try to import and use Supabase, but don't let it block the page
+          setLoading(true)
+
+          // Try to import and use Supabase with proper error handling
           const { createClient } = await import("@/lib/supabase/client")
-          const supabase = createClient()
 
-          setSupabaseAvailable(true)
+          try {
+            const supabase = createClient()
+            setSupabaseAvailable(true)
 
-          const {
-            data: { user: authUser },
-          } = await supabase.auth.getUser()
+            const {
+              data: { user: authUser },
+            } = await supabase.auth.getUser()
 
-          if (authUser) {
-            setUser(authUser)
-            router.push("/dashboard")
+            if (authUser) {
+              setUser(authUser)
+              router.push("/dashboard")
+            }
+          } catch (supabaseError) {
+            console.error("[v0] Supabase client error:", supabaseError)
+            setSupabaseAvailable(false)
           }
+        } else {
+          console.warn("[v0] Supabase environment variables not configured")
+          setSupabaseAvailable(false)
         }
       } catch (error) {
-        console.error("[v0] Supabase not available:", error)
-        // Continue without auth - this is fine for the landing page
+        console.error("[v0] Auth check failed:", error)
         setSupabaseAvailable(false)
+      } finally {
+        setLoading(false)
       }
     }
 
-    // Don't block the page load - run auth check in background
     checkAuth()
   }, [router])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -53,12 +73,18 @@ export default function HomePage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <h1 className="text-xl font-bold">Poster2Web</h1>
           <div className="flex gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/auth/sign-up">Sign Up</Link>
-            </Button>
+            {supabaseAvailable ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/auth/login">Login</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/auth/sign-up">Sign Up</Link>
+                </Button>
+              </>
+            ) : (
+              <div className="text-sm text-muted-foreground">Authentication unavailable</div>
+            )}
           </div>
         </div>
       </header>
@@ -75,12 +101,22 @@ export default function HomePage() {
               <strong>No coding required.</strong>
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/auth/sign-up">Get Started</Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="/auth/login">Login</Link>
-              </Button>
+              {supabaseAvailable ? (
+                <>
+                  <Button size="lg" asChild>
+                    <Link href="/auth/sign-up">Get Started</Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <Link href="/auth/login">Login</Link>
+                  </Button>
+                </>
+              ) : (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800 text-sm">
+                    Authentication is currently unavailable. Please check your configuration.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
