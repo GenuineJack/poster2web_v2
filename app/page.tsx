@@ -91,7 +91,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">🚀 Lightning Fast</CardTitle>
+                <CardTitle className="flex items-center gap-2">Lightning Fast</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Transform documents to websites in under 60 seconds</p>
@@ -100,7 +100,7 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">🎨 Beautiful Design</CardTitle>
+                <CardTitle className="flex items-center gap-2">Beautiful Design</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Professional templates with customizable themes</p>
@@ -109,7 +109,7 @@ export default function HomePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">📱 Responsive</CardTitle>
+                <CardTitle className="flex items-center gap-2">Responsive</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Works perfectly on desktop, tablet, and mobile devices</p>
