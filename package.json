@@ -39,6 +39,7 @@
     "@radix-ui/react-slot": "latest",
     "@radix-ui/react-switch": "latest",
     "@radix-ui/react-tabs": "latest",
+    "@radix-ui/react-toast": "1.2.8",
     "@radix-ui/react-toggle": "latest",
     "@radix-ui/react-tooltip": "latest",
     "@supabase/ssr": "latest",
