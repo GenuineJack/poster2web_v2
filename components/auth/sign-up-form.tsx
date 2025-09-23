@@ -43,17 +43,35 @@ export function SignUpForm() {
     setError(null)
 
     try {
+      const redirectUrl =
+        typeof window !== "undefined"
+          ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`
+          : "/dashboard"
+
+      console.log("[v0] Attempting signup with redirect:", redirectUrl)
+
       const { error } = await supabase.auth.signUp({
         email: sanitizedEmail,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: redirectUrl,
         },
       })
       if (error) throw error
-      router.push("/auth/sign-up-success")
+
+      console.log("[v0] Signup successful, redirecting to verify email")
+      router.push("/auth/verify-email")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      console.error("[v0] Sign up error:", error)
+      if (error instanceof Error) {
+        if (error.message.includes("User already registered")) {
+          setError("An account with this email already exists. Please try logging in instead.")
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -72,6 +90,7 @@ export function SignUpForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           maxLength={254}
+          disabled={isLoading}
         />
       </div>
       <div className="space-y-2">
@@ -85,6 +104,7 @@ export function SignUpForm() {
           autoComplete="new-password"
           minLength={8}
           maxLength={128}
+          disabled={isLoading}
         />
         <p className="text-xs text-muted-foreground">
           Password must be at least 8 characters with uppercase, lowercase, and number
@@ -101,12 +121,13 @@ export function SignUpForm() {
           autoComplete="new-password"
           minLength={8}
           maxLength={128}
+          disabled={isLoading}
         />
       </div>
       {error && (
-        <p className="text-sm text-red-500" role="alert">
+        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md" role="alert">
           {error}
-        </p>
+        </div>
       )}
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Creating account..." : "Create Account"}

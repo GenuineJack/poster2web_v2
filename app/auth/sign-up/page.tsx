@@ -31,11 +31,19 @@ export default function Page() {
       return
     }
 
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const redirectUrl =
         typeof window !== "undefined"
           ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`
           : "/dashboard"
+
+      console.log("[v0] Attempting signup with redirect:", redirectUrl)
 
       const { error } = await supabase.auth.signUp({
         email,
@@ -45,10 +53,20 @@ export default function Page() {
         },
       })
       if (error) throw error
-      router.push("/auth/sign-up-success")
+
+      console.log("[v0] Signup successful, redirecting to verify email")
+      router.push("/auth/verify-email")
     } catch (error: unknown) {
       console.error("[v0] Sign up error:", error)
-      setError(error instanceof Error ? error.message : "An error occurred")
+      if (error instanceof Error) {
+        if (error.message.includes("User already registered")) {
+          setError("An account with this email already exists. Please try logging in instead.")
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -75,6 +93,7 @@ export default function Page() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -87,7 +106,10 @@ export default function Page() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      minLength={8}
                     />
+                    <p className="text-xs text-muted-foreground">Password must be at least 8 characters long</p>
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
@@ -99,11 +121,15 @@ export default function Page() {
                       required
                       value={repeatPassword}
                       onChange={(e) => setRepeatPassword(e.target.value)}
+                      disabled={isLoading}
+                      minLength={8}
                     />
                   </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
+                  {error && (
+                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+                  )}
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating an account..." : "Sign up"}
+                    {isLoading ? "Creating account..." : "Sign up"}
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
