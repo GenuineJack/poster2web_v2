@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { ProjectList } from "@/components/project-list"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function DashboardPage() {
   try {
@@ -13,6 +14,8 @@ export default async function DashboardPage() {
     if (error || !data?.user) {
       redirect("/auth/login")
     }
+
+    const isEmailConfirmed = data.user.email_confirmed_at !== null
 
     return (
       <div className="min-h-screen bg-background">
@@ -34,6 +37,23 @@ export default async function DashboardPage() {
         </header>
 
         <main className="container mx-auto px-4 py-8">
+          {!isEmailConfirmed && (
+            <Card className="mb-6 border-yellow-200 bg-yellow-50">
+              <CardHeader>
+                <CardTitle className="text-yellow-800">Email Confirmation Required</CardTitle>
+                <CardDescription className="text-yellow-700">
+                  Please check your email and click the confirmation link to fully activate your account and access all
+                  features.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-yellow-600">
+                  Didn't receive the email? Check your spam folder or contact support if you need help.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <ProjectList />
         </main>
       </div>

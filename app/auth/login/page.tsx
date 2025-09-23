@@ -31,18 +31,36 @@ export default function Page() {
           ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`
           : "/dashboard"
 
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("[v0] Attempting login with redirect:", redirectUrl)
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
         },
       })
-      if (error) throw error
+
+      if (error) {
+        console.error("[v0] Login error:", error)
+        throw error
+      }
+
+      console.log("[v0] Login successful:", data.user?.email)
       router.push("/dashboard")
     } catch (error: unknown) {
       console.error("[v0] Login error:", error)
-      setError(error instanceof Error ? error.message : "An error occurred")
+      if (error instanceof Error) {
+        if (error.message.includes("Invalid login credentials")) {
+          setError("Invalid email or password. Please check your credentials and try again.")
+        } else if (error.message.includes("Email not confirmed")) {
+          setError("Please check your email and click the confirmation link before logging in.")
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -69,6 +87,7 @@ export default function Page() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -79,9 +98,12 @@ export default function Page() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
                     />
                   </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
+                  {error && (
+                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+                  )}
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Logging in..." : "Login"}
                   </Button>

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -26,37 +27,56 @@ export default function HomePage() {
           const {
             data: { user },
           } = await supabase.auth.getUser()
-          setUser(user)
 
-          if (user) {
+          setUser(user)
+          setAuthChecked(true)
+
+          // Only redirect if user is authenticated and we haven't already checked
+          if (user && !authChecked) {
             router.push("/dashboard")
             return
           }
 
-          // Set up auth state listener
+          // Set up auth state listener with proper cleanup
           const {
             data: { subscription },
           } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === "SIGNED_IN") {
-              setUser(session?.user ?? null)
+            console.log("[v0] Auth state change:", event)
+            if (event === "SIGNED_IN" && session?.user) {
+              setUser(session.user)
               router.push("/dashboard")
             } else if (event === "SIGNED_OUT") {
               setUser(null)
             }
           })
 
-          return () => subscription.unsubscribe()
+          // Return cleanup function
+          return () => {
+            console.log("[v0] Cleaning up auth subscription")
+            subscription.unsubscribe()
+          }
+        } else {
+          console.log("[v0] Supabase env vars not available")
+          setAuthChecked(true)
         }
       } catch (error) {
-        console.error("Auth check failed:", error)
+        console.error("[v0] Auth check failed:", error)
         setUser(null)
+        setAuthChecked(true)
       } finally {
         setLoading(false)
       }
     }
 
-    checkAuth()
-  }, [router])
+    if (!authChecked) {
+      const cleanup = checkAuth()
+      return () => {
+        if (cleanup instanceof Promise) {
+          cleanup.then((cleanupFn) => cleanupFn?.())
+        }
+      }
+    }
+  }, [router, authChecked])
 
   if (loading) {
     return (
@@ -66,8 +86,15 @@ export default function HomePage() {
     )
   }
 
-  if (user) {
-    return null
+  if (user && authChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Redirecting to dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

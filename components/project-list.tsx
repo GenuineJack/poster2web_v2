@@ -19,6 +19,7 @@ import { toast } from "@/hooks/use-toast"
 export function ProjectList() {
   const [projects, setProjects] = useState<DatabaseProject[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -29,8 +30,14 @@ export function ProjectList() {
     try {
       const data = await database.getProjects()
       setProjects(data)
+      setError(null)
     } catch (error) {
       console.error("Error loading projects:", error)
+      if (error instanceof Error && error.message.includes("JWT")) {
+        setError("Please confirm your email address to access your projects.")
+      } else {
+        setError("Failed to load projects. Please try refreshing the page.")
+      }
       toast({
         title: "Error",
         description: "Failed to load projects",
@@ -50,11 +57,19 @@ export function ProjectList() {
       router.push(`/editor/${project.id}`)
     } catch (error) {
       console.error("Error creating project:", error)
-      toast({
-        title: "Error",
-        description: "Failed to create project",
-        variant: "destructive",
-      })
+      if (error instanceof Error && error.message.includes("JWT")) {
+        toast({
+          title: "Email Confirmation Required",
+          description: "Please confirm your email address before creating projects.",
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project",
+          variant: "destructive",
+        })
+      }
     }
   }
 
@@ -86,7 +101,6 @@ export function ProjectList() {
         theme_settings: project.theme_settings,
       })
 
-      // Copy sections
       const sections = await database.getProjectSections(project.id)
       for (const section of sections) {
         await database.createSection({
@@ -142,6 +156,30 @@ export function ProjectList() {
             </CardContent>
           </Card>
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">My Projects</h2>
+            <p className="text-muted-foreground">Manage your website projects</p>
+          </div>
+        </div>
+
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FileText className="h-12 w-12 text-red-400 mb-4" />
+            <h3 className="text-lg font-semibold mb-2 text-red-800">Unable to Load Projects</h3>
+            <p className="text-red-600 text-center mb-4">{error}</p>
+            <Button onClick={loadProjects} variant="outline">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
