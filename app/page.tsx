@@ -20,6 +20,11 @@ export default function HomePage() {
           data: { user },
         } = await supabase.auth.getUser()
         setUser(user)
+
+        if (user) {
+          router.push("/dashboard")
+          return
+        }
       } catch (error) {
         console.error("Error getting user:", error)
         setUser(null)
@@ -46,19 +51,18 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-svh items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   if (user) {
-    router.push("/dashboard")
     return null
   }
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className="flex min-h-screen flex-col">
       <header className="border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <h1 className="text-xl font-bold">Poster2Web</h1>
