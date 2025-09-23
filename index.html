@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster2Web - Transform Documents into Beautiful Websites</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%221em%22 font-size=%2216%22>💚</text></svg>">
+    
+     External Libraries 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+     Tesseract.js for browser‑based OCR 
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    
+     Set PDF.js worker 
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        } else {
+            console.warn('PDF.js not loaded - PDF processing will be unavailable');
+        }
+    </script>
+    
+     Styles 
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    
+     Added meta tags for better SEO and accessibility 
+    <meta name="description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
+    <meta name="keywords" content="PDF to website, document converter, website builder, responsive design">
+    <meta name="author" content="Poster2Web">
+    <meta name="theme-color" content="#16a34a">
+    
+     Open Graph / Facebook 
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://poster2web.com/">
+    <meta property="og:title" content="Poster2Web - Transform Documents into Beautiful Websites">
+    <meta property="og:description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
+    
+     Twitter 
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://poster2web.com/">
+    <meta property="twitter:title" content="Poster2Web - Transform Documents into Beautiful Websites">
+    <meta property="twitter:description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
+</head>
+<body>
+     Added main landmark for better accessibility 
+    <main role="main">
+         Auto-save Indicator 
+        <div id="autosaveIndicator" class="autosave-indicator" role="status" aria-live="polite">💾 Saved</div>
+        
+         Toast Notification 
+        <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+        <div class="main-content" id="main-content">
+             UPLOAD SCREEN 
+            <div id="uploadScreen" class="screen active">
+                <div class="header-icons">
+                    <button class="icon-button" onclick="showInfo()" title="About Poster2Web" aria-label="About Poster2Web">
+                        <span aria-hidden="true">ℹ️</span>
+                    </button>
+                    <button class="icon-button" onclick="goHome()" title="Home" aria-label="Home">
+                        <span aria-hidden="true">🏠</span>
+                    </button>
+                </div>
+
+                <div style="max-width: 1200px; margin: 0 auto; padding: 64px 20px 40px;">
+                     Enhanced Hero Section 
+                    <header style="text-align: center; margin-bottom: 56px;">
+                        <div style="display: inline-flex; align-items: center; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 45%) 100%); color: white; padding: 10px 28px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 32px; box-shadow: var(--shadow-md); border: 1px solid hsl(142 76% 86% / 0.5); backdrop-filter: blur(10px); letter-spacing: 0.025em;" aria-label="Feature highlight">
+                            <span aria-hidden="true">⚡</span> Single Page Websites in a Flash <span aria-hidden="true">⚡</span>
+                        </div>
+                        <h1 style="font-size: clamp(48px, 8vw, 72px); font-weight: 900; margin-bottom: 24px; line-height: 1.1; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 35%) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                            <span style="color: var(--primary); font-weight: 900;">Poster2Web</span>
+                        </h1>
+                        <p style="font-size: clamp(18px, 3vw, 24px); color: var(--muted-foreground); max-width: 600px; margin: 0 auto 48px; line-height: 1.5; font-weight: 400;">
+                            Transform documents into beautiful websites in minutes.<br>
+                            <strong style="color: var(--foreground); font-weight: 600;">No coding required.</strong>
+                        </p>
+                    </header>
+
+                     Enhanced Upload Container 
+                    <div class="upload-container">
+                        <div id="dropZone" class="drop-zone" role="button" tabindex="0" aria-label="File upload area. Click or drag files here to upload." aria-describedby="upload-instructions">
+                            <input type="file" id="fileInput" accept=".pdf,.pptx,.txt,.html,.htm,.png,.jpg,.jpeg" aria-label="Choose file to upload">
+                            <div class="upload-icon">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M12 15L12 3M12 3L16 7M12 3L8 7" stroke="url(#gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L2 19C2 20.1046 2.89543 21 4 21L20 21C21.1046 21 22 20.1046 22 19L22 17" stroke="url(#gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="var(--primary)"/>
+                                            <stop offset="100%" stop-color="hsl(142 76% 45%)"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                            <h3 class="upload-title">Drop your content here</h3>
+                            <p class="upload-subtitle" id="upload-instructions">or click anywhere to browse your files</p>
+                            <button type="button" class="browse-button" id="browseBtn">Start Weaving</button>
+                        </div>
+                        
+                        <div class="upload-formats">
+                            Supports PDF, PowerPoint (PPTX), Text (TXT), HTML, and image files
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button type="button" class="browse-button secondary" id="blankBtn">Create Blank Website</button>
+                        </div>
+                    </div>
+
+                     Features Preview Section 
+                    <section style="margin-top: 80px; text-align: center;" aria-labelledby="features-heading">
+                        <h2 id="features-heading" style="font-size: 24px; font-weight: 700; color: var(--foreground); margin-bottom: 16px; letter-spacing: -0.01em;">
+                            Why Choose Poster2Web?
+                        </h2>
+                        <p style="color: var(--muted-foreground); margin-bottom: 48px; font-size: 16px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                            The fastest way to turn your content into professional websites
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: 40px;" role="list">
+                            <div style="text-align: center; padding: 24px; background: var(--card); border-radius: var(--radius-xl); border: 1px solid var(--border); box-shadow: var(--shadow-xs);" role="listitem">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 45%) 100%); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;" aria-hidden="true">
+                                    🚀
+                                </div>
+                                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--foreground);">Lightning Fast</h3>
+                                <p style="color: var(--muted-foreground); font-size: 14px; line-height: 1.5;">Transform documents to websites in under 60 seconds</p>
+                            </div>
+                            
+                            <div style="text-align: center; padding: 24px; background: var(--card); border-radius: var(--radius-xl); border: 1px solid var(--border); box-shadow: var(--shadow-xs);" role="listitem">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 45%) 100%); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;" aria-hidden="true">
+                                    🎨
+                                </div>
+                                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--foreground);">Beautiful Design</h3>
+                                <p style="color: var(--muted-foreground); font-size: 14px; line-height: 1.5;">Professional templates with customizable themes</p>
+                            </div>
+                            
+                            <div style="text-align: center; padding: 24px; background: var(--card); border-radius: var(--radius-xl); border: 1px solid var(--border); box-shadow: var(--shadow-xs);" role="listitem">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 45%) 100%); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;" aria-hidden="true">
+                                    📱
+                                </div>
+                                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--foreground);">Mobile Ready</h3>
+                                <p style="color: var(--muted-foreground); font-size: 14px; line-height: 1.5;">Responsive designs that work on all devices</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+             LOADING SCREEN 
+            <div id="loadingScreen" class="screen loading-screen">
+                <div class="loading-container">
+                    <div class="loading-spinner" role="status" aria-label="Loading"></div>
+                    <h2 id="loadingTitle" class="loading-title">Processing your file</h2>
+                    <p id="loadingMessage" class="loading-message">Extracting content and analyzing structure...</p>
+                     Progress bar container. The bar itself will be updated via JS. Using inline styles and CSS variables ensures it inherits the existing design system without adding new classes. 
+                    <div id="loadingProgress" style="width:100%; height:8px; border-radius: var(--radius-lg); background: var(--muted); overflow: hidden; margin-top: 12px; display: none;" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div id="loadingProgressFill" style="height:100%; width:0%; background: var(--primary); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+             EDITOR SCREEN 
+            <div id="editorScreen" class="screen">
+                 Editor Header 
+                <div class="editor-header">
+                    <button id="backButton" class="back-button" aria-label="Go back to upload screen">
+                        ← Back to Upload
+                    </button>
+                    <div class="editor-title">
+                        <h1>Poster2Web Editor</h1>
+                        <div id="pdfName" class="pdf-name">Document.pdf</div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="showPreviewModal()" aria-label="Preview website">
+                            <span aria-hidden="true">👁️</span> Preview
+                        </button>
+                        <button class="btn btn-primary" onclick="exportWebsite()" aria-label="Export website">
+                            <span aria-hidden="true">💾</span> Export
+                        </button>
+                        <button id="builderThemeToggle" class="btn btn-secondary" onclick="toggleBuilderDarkMode()" aria-label="Toggle dark mode">
+                            <span aria-hidden="true">🌙</span> <span id="themeToggleText">Dark</span>
+                        </button>
+                    </div>
+                </div>
+
+                 Tabs 
+                <div class="tabs" role="tablist" aria-label="Editor sections">
+                    <div class="tab active" data-tab="content" onclick="switchTab('content')" role="tab" tabindex="0" aria-selected="true" aria-controls="contentTab" id="content-tab">
+                        <span aria-hidden="true">📝</span> Content
+                    </div>
+                    <div class="tab" data-tab="design" onclick="switchTab('design')" role="tab" tabindex="-1" aria-selected="false" aria-controls="designTab" id="design-tab">
+                        <span aria-hidden="true">🎨</span> Design
+                    </div>
+                    <div class="tab" data-tab="settings" onclick="switchTab('settings')" role="tab" tabindex="-1" aria-selected="false" aria-controls="settingsTab" id="settings-tab">
+                        <span aria-hidden="true">⚙️</span> Settings
+                    </div>
+                </div>
+
+                 Editor Content 
+                <div class="editor-content" id="editor-content">
+                     Left Side: Form/Editor 
+                    <div class="form-section">
+                         Content Tab 
+                        <div id="contentTab" class="tab-content active" role="tabpanel" aria-labelledby="content-tab">
+                            <div class="sections-header">
+                                <h2 class="sections-title"><span aria-hidden="true">📄</span> Sections</h2>
+                                <button class="btn btn-small btn-primary" onclick="addSection()" aria-label="Add new section">
+                                    + Add Section
+                                </button>
+                            </div>
+                            <div id="sectionsContainer" role="region" aria-label="Content sections">
+                                 Sections will be dynamically added here 
+                            </div>
+                        </div>
+
+                         Design Tab 
+                        <div id="designTab" class="tab-content" role="tabpanel" aria-labelledby="design-tab">
+                            <h2 style="margin-bottom: 24px;"><span aria-hidden="true">🎨</span> Design Settings</h2>
+                            
+                             Color Scheme 
+                            <div class="form-group">
+                                <label class="form-label" for="colorScheme">
+                                    Color Scheme
+                                    <span class="info-tooltip" title="Choose a predefined color scheme" aria-label="Help: Choose a predefined color scheme">ℹ️</span>
+                                </label>
+                                <select id="colorScheme" class="form-select" onchange="updateColorScheme()" aria-describedby="colorScheme-help">
+                                    <option value="growth-green">🌱 Growth Green</option>
+                                    <option value="trust-blue">💙 Trust Blue</option>
+                                    <option value="premium-purple">💜 Premium Purple</option>
+                                    <option value="bold-red">❤️ Bold Red</option>
+                                    <option value="modern-teal">🦋 Modern Teal</option>
+                                    <option value="sunset-orange">🌅 Sunset Orange</option>
+                                    <option value="energy-yellow">⚡ Energy Yellow</option>
+                                    <option value="professional-grey">📘 Professional Grey</option>
+                                    <option value="custom">🎨 Custom</option>
+                                </select>
+                                <span id="colorScheme-help" class="sr-only">Select a predefined color scheme for your website</span>
+                            </div>
+
+                             Custom Colors 
+                            <div class="form-group">
+                                <label class="form-label" for="primaryColor">Primary Color</label>
+                                <div class="color-picker">
+                                    <input type="color" id="primaryColor" class="color-input" value="#16a34a" aria-label="Primary color picker">
+                                    <input type="text" id="primaryColorHex" class="form-input" value="#16a34a" style="width: 100px; margin-left: 12px;" aria-label="Primary color hex value">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="secondaryColor">Secondary Color</label>
+                                <div class="color-picker">
+                                    <input type="color" id="secondaryColor" class="color-input" value="#15803d" aria-label="Secondary color picker">
+                                    <input type="text" id="secondaryColorHex" class="form-input" value="#15803d" style="width: 100px; margin-left: 12px;" aria-label="Secondary color hex value">
+                                </div>
+                            </div>
+
+                             Logo Upload 
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Logo
+                                    <span class="info-tooltip" title="Upload a logo for your website header" aria-label="Help: Upload a logo for your website header">ℹ️</span>
+                                </label>
+                                <label for="logoInput" class="file-upload-label" style="display: inline-block; padding: 10px 20px; background: var(--primary); color: white; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease; font-weight: 500;">
+                                    Choose Logo Image
+                                </label>
+                                <input type="file" id="logoInput" accept="image/*" onchange="handleLogoUpload(event)" style="display: none;" aria-describedby="logo-help">
+                                <div id="logoPreview" style="margin-top: 12px;" aria-live="polite"></div>
+                                <span id="logo-help" class="sr-only">Upload an image file to use as your website logo</span>
+                            </div>
+
+                             Logo Size 
+                            <div class="form-group">
+                                <label class="form-label" for="logoSize">Logo Size</label>
+                                <div class="range-group">
+                                    <input type="range" id="logoSize" class="range-input" min="60" max="200" value="120" oninput="updateLogoSize()" aria-describedby="logoSize-value">
+                                    <span id="logoSizeValue" class="range-value" aria-live="polite">120px</span>
+                                </div>
+                            </div>
+
+                             Header Alignment 
+                            <div class="form-group">
+                                <label class="form-label" for="headerAlignment">Header Alignment</label>
+                                <select id="headerAlignment" class="form-select">
+                                    <option value="left">Left</option>
+                                    <option value="center" selected>Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+
+                             Typography 
+                            <div class="form-group">
+                                <label class="form-label" for="fontStyle">Font Style</label>
+                                <select id="fontStyle" class="form-select">
+                                    <option value="system" selected>System Default</option>
+                                    <option value="serif">Serif</option>
+                                    <option value="mono">Monospace</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="titleSize">Title Size</label>
+                                <div class="range-group">
+                                    <input type="range" id="titleSize" class="range-input" min="24" max="60" value="32" oninput="updateTitleSize()" aria-describedby="titleSize-value">
+                                    <span id="titleSizeValue" class="range-value" aria-live="polite">32px</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="contentSize">Content Size</label>
+                                <div class="range-group">
+                                    <input type="range" id="contentSize" class="range-input" min="14" max="24" value="16" oninput="updateContentSize()" aria-describedby="contentSize-value">
+                                    <span id="contentSizeValue" class="range-value" aria-live="polite">16px</span>
+                                </div>
+                            </div>
+
+                             Layout Style 
+                            <div class="form-group">
+                                <label class="form-label" for="layoutStyle">
+                                    Layout Style
+                                    <span class="info-tooltip" title="Choose how sections are navigated" aria-label="Help: Choose how sections are navigated">ℹ️</span>
+                                </label>
+                                <select id="layoutStyle" class="form-select">
+                                    <option value="single" selected>Single Page (Traditional)</option>
+                                    <option value="sections">Section Navigation Bar</option>
+                                    <option value="menu">Hamburger Menu</option>
+                                </select>
+                            </div>
+                        </div>
+
+                         UPDATED Settings Tab 
+                        <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
+                            <h2 style="margin-bottom: 24px;"><span aria-hidden="true">⚙️</span> Settings</h2>
+                            
+                             Custom Buttons Manager 
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <span aria-hidden="true">🔘</span> Custom Buttons
+                                    <span class="info-tooltip" title="Add up to 3 custom buttons (file, link or email)" aria-label="Help: Add up to 3 custom buttons for file downloads, links, or email contacts">ℹ️</span>
+                                </label>
+                                <div id="buttonsContainer" class="custom-buttons-container" role="region" aria-label="Custom buttons"></div>
+                                <div id="addButtonMenu" class="add-button-menu" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-small btn-primary" onclick="addButton('file')" aria-label="Add file download button">+ File Button</button>
+                                    <button type="button" class="btn btn-small btn-primary" onclick="addButton('link')" aria-label="Add link button">+ Link Button</button>
+                                    <button type="button" class="btn btn-small btn-primary" onclick="addButton('email')" aria-label="Add email button">+ Email Button</button>
+                                </div>
+                            </div>
+                             Button Preview 
+                            <div class="form-group">
+                                <label class="form-label">Button Preview</label>
+                                <div id="buttonPreview" class="custom-buttons-preview" style="padding: 16px; background: var(--muted); border-radius: var(--radius-lg); text-align: center;" role="region" aria-label="Button preview" aria-live="polite"></div>
+                            </div>
+
+                             Analytics Code 
+                            <div class="form-group">
+                                <label class="form-label" for="analyticsCode">
+                                    <span aria-hidden="true">📊</span> Analytics Code
+                                    <span class="info-tooltip" title="Add Google Analytics or other tracking code" aria-label="Help: Add Google Analytics or other tracking code">ℹ️</span>
+                                </label>
+                                <textarea id="analyticsCode" class="form-textarea" rows="4" placeholder="Paste your analytics tracking code here..." aria-describedby="analytics-help"></textarea>
+                                <span id="analytics-help" class="form-help">This code will be added to the &lt;head&gt; section of your exported website</span>
+                            </div>
+                        </div>
+                    </div>
+
+                     Right Side: Preview 
+                    <div class="preview-section" id="preview-content">
+                        <div class="preview-container">
+                            <div class="preview-header">
+                                <div class="preview-dots" aria-hidden="true">
+                                    <span class="preview-dot"></span>
+                                    <span class="preview-dot"></span>
+                                    <span class="preview-dot"></span>
+                                </div>
+                                <span class="preview-url">https://your-website.com</span>
+                            </div>
+                             The iframe is wrapped to offset it by the faux browser header height. 
+                            <div class="preview-iframe-wrapper">
+                                <iframe id="websitePreview" class="preview-iframe" srcdoc="<h1>Loading preview...</h1>" title="Website preview" aria-label="Live preview of your website"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+     Preview Modal 
+    <div id="previewModal" class="modal" role="dialog" aria-labelledby="preview-modal-title" aria-hidden="true" aria-modal="true">
+        <div class="modal-content large">
+            <button class="close-btn" onclick="closePreviewModal()" aria-label="Close preview modal">✕</button>
+            <div class="modal-header">
+                <h2 id="preview-modal-title" class="modal-title">Website Preview</h2>
+                <div style="display: flex; gap: 12px; margin-top: 20px;" role="group" aria-label="Device preview options">
+                    <button id="desktopBtn" class="btn btn-small btn-secondary active" onclick="setPreviewDevice('desktop')" aria-pressed="true">
+                        <span aria-hidden="true">💻</span> Desktop
+                    </button>
+                    <button id="tabletHBtn" class="btn btn-small btn-secondary" onclick="setPreviewDevice('tablet-h')" aria-pressed="false">
+                        <span aria-hidden="true">📱</span> Tablet H
+                    </button>
+                    <button id="tabletVBtn" class="btn btn-small btn-secondary" onclick="setPreviewDevice('tablet-v')" aria-pressed="false">
+                        <span aria-hidden="true">📱</span> Tablet V
+                    </button>
+                    <button id="mobileBtn" class="btn btn-small btn-secondary" onclick="setPreviewDevice('mobile')" aria-pressed="false">
+                        <span aria-hidden="true">📱</span> Mobile
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+                <div id="previewFrame" class="preview-frame desktop">
+                    <iframe id="fullPreview" style="width: 100%; height: 100%; border: none;" srcdoc="<h1>Loading preview...</h1>" title="Full website preview"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     Export Modal 
+    <div id="exportModal" class="modal" role="dialog" aria-labelledby="export-modal-title" aria-hidden="true" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeExportModal()" aria-label="Close export modal">✕</button>
+            <h2 id="export-modal-title" class="modal-title">Export Your Website</h2>
+            <p class="modal-subtitle">Choose your preferred format</p>
+            
+            <div class="export-options" role="radiogroup" aria-labelledby="export-modal-title">
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="html" checked aria-describedby="html-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">📄</span> HTML (Standalone)</div>
+                        <div id="html-desc" class="export-option-desc">Single HTML file ready to deploy anywhere</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="react" aria-describedby="react-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">⚛️</span> React Component</div>
+                        <div id="react-desc" class="export-option-desc">Modern React component with hooks</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="nextjs" aria-describedby="nextjs-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">▲</span> Next.js Page</div>
+                        <div id="nextjs-desc" class="export-option-desc">Server-side rendered with SEO optimization</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="vue" aria-describedby="vue-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">💚</span> Vue.js Component</div>
+                        <div id="vue-desc" class="export-option-desc">Vue 3 composition API component</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="markdown" aria-describedby="markdown-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">📝</span> Markdown</div>
+                        <div id="markdown-desc" class="export-option-desc">Clean markdown for documentation</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="pdf" aria-describedby="pdf-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">📄</span> PDF Document</div>
+                        <div id="pdf-desc" class="export-option-desc">Print-optimized PDF version</div>
+                    </div>
+                </label>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+                <p style="font-size: 14px; color: var(--muted-foreground); margin-bottom: 16px; text-align: center;">
+                    <strong><span aria-hidden="true">🚀</span> Deploy-Ready Packages</strong>
+                </p>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="netlify" aria-describedby="netlify-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">🌐</span> Netlify Package</div>
+                        <div id="netlify-desc" class="export-option-desc">Ready-to-deploy ZIP with Netlify config</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="vercel" aria-describedby="vercel-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">▲</span> Vercel Package</div>
+                        <div id="vercel-desc" class="export-option-desc">Optimized for Vercel deployment</div>
+                    </div>
+                </label>
+                
+                <label class="export-option">
+                    <input type="radio" name="exportFormat" value="github-pages" aria-describedby="github-desc">
+                    <div>
+                        <div class="export-option-title"><span aria-hidden="true">🐙</span> GitHub Pages</div>
+                        <div id="github-desc" class="export-option-desc">Ready for GitHub Pages hosting</div>
+                    </div>
+                </label>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-top: 24px;" onclick="downloadWebsite()">
+                <span aria-hidden="true">💾</span> Download Website
+            </button>
+        </div>
+    </div>
+
+     Info Modal 
+    <div id="infoModal" class="modal" role="dialog" aria-labelledby="info-modal-title" aria-hidden="true" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeInfoModal()" aria-label="Close info modal">✕</button>
+            <h2 id="info-modal-title" class="modal-title">About Poster2Web</h2>
+            <p style="line-height: 1.7; color: var(--muted-foreground); margin-top: 12px;">
+                <strong>Poster2Web</strong> turns PDFs, PowerPoints, images, and text into polished, responsive single‑page websites.
+                Drag, edit, and export to plain HTML, React, or Next.js—no frameworks required.
+            </p>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin: 18px 0 6px;" role="list">
+                <div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px;" role="listitem">
+                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🚀</span> Fast Build</h4>
+                    <div style="color: var(--muted-foreground);">Upload or start blank, then rearrange sections and content blocks with ease.</div>
+                </div>
+                <div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px;" role="listitem">
+                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🎨</span> Design Controls</h4>
+                    <div style="color: var(--muted-foreground);">Color schemes, logos, type sizing, and layout modes.</div>
+                </div>
+                <div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px;" role="listitem">
+                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🧰</span> Exports</h4>
+                    <div style="color: var(--muted-foreground);">Download clean HTML, a React component, or a Next.js page.</div>
+                </div>
+                <div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px;" role="listitem">
+                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🧩</span> Add‑ons</h4>
+                    <div style="color: var(--muted-foreground);">Custom buttons (email, phone, links, downloads), print‑optimized mode, and SEO tags.</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top: 16px;">
+                <button class="btn btn-primary" onclick="getStartedFromModal()" style="flex:1">Get Started</button>
+                <button class="btn btn-secondary" onclick="closeInfoModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                Made with <span aria-hidden="true">🧡</span> by <a href="https://www.linkedin.com/in/jackdemanche/" target="_blank" rel="noopener">Jack</a>
+            </div>
+        </div>
+    </footer>
+
+     Added error handling and dependency checks for JavaScript modules 
+    <script>
+        // Check if required dependencies are loaded
+        if (typeof pdfjsLib === 'undefined') {
+            console.warn('PDF.js not loaded - PDF processing will be unavailable');
+        }
+        if (typeof JSZip === 'undefined') {
+            console.warn('JSZip not loaded - PowerPoint processing will be unavailable');
+        }
+        if (typeof Tesseract === 'undefined') {
+            console.warn('Tesseract.js not loaded - OCR processing will be unavailable');
+        }
+    </script>
+    
+     Load JavaScript modules in correct order 
+    <script src="js/utils.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/fileHandlers.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/advanced-editor.js"></script>
+    <script src="js/templates.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/advanced-export.js"></script>
+    <script src="js/accessibility.js"></script>
+    <script src="js/ocr.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
