@@ -32,16 +32,22 @@ export default function Page() {
     }
 
     try {
+      const redirectUrl =
+        typeof window !== "undefined"
+          ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`
+          : "/dashboard"
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: redirectUrl,
         },
       })
       if (error) throw error
       router.push("/auth/sign-up-success")
     } catch (error: unknown) {
+      console.error("[v0] Sign up error:", error)
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
       setIsLoading(false)
