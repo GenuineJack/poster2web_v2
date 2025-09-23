@@ -2,8 +2,6 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
-  console.log("[v0] Middleware processing path:", request.nextUrl.pathname)
-
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -39,8 +37,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log("[v0] User authenticated:", !!user)
-
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
@@ -48,7 +44,6 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth")
   ) {
     // no user, potentially respond by redirecting the user to the login page
-    console.log("[v0] Redirecting to login")
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"
     return NextResponse.redirect(url)
@@ -67,6 +62,5 @@ export async function updateSession(request: NextRequest) {
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
 
-  console.log("[v0] Middleware completed successfully")
   return supabaseResponse
 }
