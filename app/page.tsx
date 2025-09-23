@@ -1,144 +1,123 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
-  useEffect(() => {
-    // Redirect to the HTML file or serve it directly
-    if (typeof window !== "undefined") {
-      // Check if we're in the v0 preview environment
-      const isV0Preview = window.location.hostname.includes("v0.app") || window.location.hostname.includes("vercel.app")
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const supabase = createClient()
 
-      if (!isV0Preview) {
-        // In production, redirect to index.html
-        window.location.href = "/index.html"
-      }
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
     }
-  }, [])
+
+    getUser()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        setUser(session?.user ?? null)
+        router.push("/dashboard")
+      } else if (event === "SIGNED_OUT") {
+        setUser(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth, router])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (user) {
+    router.push("/dashboard")
+    return null
+  }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          maxWidth: "600px",
-          background: "white",
-          padding: "3rem",
-          borderRadius: "12px",
-          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "2.5rem",
-            fontWeight: "bold",
-            marginBottom: "1rem",
-            background: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
-          Poster2Web
-        </h1>
-
-        <p
-          style={{
-            fontSize: "1.25rem",
-            color: "#6b7280",
-            marginBottom: "2rem",
-            lineHeight: "1.6",
-          }}
-        >
-          Transform documents into beautiful websites in minutes.
-          <br />
-          <strong style={{ color: "#374151" }}>No coding required.</strong>
-        </p>
-
-        <div
-          style={{
-            padding: "2rem",
-            background: "#f9fafb",
-            borderRadius: "8px",
-            border: "2px dashed #d1d5db",
-            marginBottom: "2rem",
-          }}
-        >
-          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📁</div>
-          <p style={{ color: "#6b7280", marginBottom: "1rem" }}>This is a preview of your Poster2Web application.</p>
-          <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-            The full HTML/JavaScript application with drag-and-drop file upload is available when you download and run
-            the project locally.
-          </p>
+    <div className="flex min-h-svh flex-col">
+      <header className="border-b">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <h1 className="text-xl font-bold">Poster2Web</h1>
+          <div className="flex gap-2">
+            <Button variant="ghost" asChild>
+              <Link href="/auth/login">Login</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/auth/sign-up">Sign Up</Link>
+            </Button>
+          </div>
         </div>
+      </header>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1rem",
-            marginBottom: "2rem",
-          }}
-        >
-          <div
-            style={{
-              padding: "1.5rem",
-              background: "#f0fdf4",
-              borderRadius: "8px",
-              border: "1px solid #bbf7d0",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🚀</div>
-            <h3 style={{ fontWeight: "600", marginBottom: "0.5rem" }}>Lightning Fast</h3>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-              Transform documents to websites in under 60 seconds
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
+              Poster2Web
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Transform documents into beautiful websites in minutes.
+              <br />
+              <strong>No coding required.</strong>
             </p>
+            <div className="flex gap-4 justify-center">
+              <Button size="lg" asChild>
+                <Link href="/auth/sign-up">Get Started</Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/auth/login">Login</Link>
+              </Button>
+            </div>
           </div>
 
-          <div
-            style={{
-              padding: "1.5rem",
-              background: "#f0fdf4",
-              borderRadius: "8px",
-              border: "1px solid #bbf7d0",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎨</div>
-            <h3 style={{ fontWeight: "600", marginBottom: "0.5rem" }}>Beautiful Design</h3>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>Professional templates with customizable themes</p>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">🚀 Lightning Fast</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Transform documents to websites in under 60 seconds</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">🎨 Beautiful Design</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Professional templates with customizable themes</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">📱 Responsive</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Works perfectly on desktop, tablet, and mobile devices</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-
-        <div
-          style={{
-            padding: "1rem",
-            background: "#eff6ff",
-            borderRadius: "8px",
-            border: "1px solid #bfdbfe",
-            fontSize: "0.875rem",
-            color: "#1e40af",
-          }}
-        >
-          <strong>To use the full application:</strong>
-          <br />
-          1. Download this project
-          <br />
-          2. Run <code style={{ background: "#e5e7eb", padding: "0.25rem", borderRadius: "4px" }}>npm start</code>
-          <br />
-          3. Open{" "}
-          <code style={{ background: "#e5e7eb", padding: "0.25rem", borderRadius: "4px" }}>http://localhost:3000</code>
-        </div>
-      </div>
+      </main>
     </div>
   )
 }

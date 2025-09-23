@@ -9,14 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/html',
-        destination: '/index.html',
-      },
-    ];
-  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons']
+  }
 }
 
 export default nextConfig

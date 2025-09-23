@@ -1,27 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Eye, Download, Moon, Sun } from "lucide-react"
+import { ArrowLeft, Eye, Download, Moon, Sun, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAppState } from "@/hooks/use-app-state"
+import { useProjectSync } from "@/hooks/use-project-sync"
 import { ContentTab } from "@/components/editor/content-tab"
 import { DesignTab } from "@/components/editor/design-tab"
 import { SettingsTab } from "@/components/editor/settings-tab"
 import { WebsitePreview } from "@/components/website-preview"
 import { ExportDialog } from "@/components/export-dialog"
+import { useRouter } from "next/navigation"
 
 export function EditorScreen() {
   const { state, actions } = useAppState()
   const [showPreview, setShowPreview] = useState(false)
   const [showExport, setShowExport] = useState(false)
+  const router = useRouter()
+
+  // Get project ID from window (set by EditorWrapper)
+  const projectId = (window as any).__currentProjectId
+  const { saveProject } = useProjectSync(projectId)
 
   const handleBack = () => {
-    actions.setScreen("upload")
+    router.push("/dashboard")
   }
 
   const toggleDarkMode = () => {
     actions.updateSettings({ darkMode: !state.settings.darkMode })
+  }
+
+  const handleSave = async () => {
+    await saveProject()
   }
 
   return (
@@ -33,7 +44,7 @@ export function EditorScreen() {
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={handleBack} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Upload
+                Back to Dashboard
               </Button>
               <div>
                 <h1 className="text-xl font-bold">Poster2Web Editor</h1>
@@ -42,6 +53,12 @@ export function EditorScreen() {
             </div>
 
             <div className="flex items-center gap-2">
+              {state.unsavedChanges && (
+                <Button variant="outline" onClick={handleSave} className="gap-2 bg-transparent">
+                  <Save className="h-4 w-4" />
+                  Save
+                </Button>
+              )}
               <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
                 <Eye className="h-4 w-4" />
                 Preview
@@ -99,6 +116,9 @@ export function EditorScreen() {
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
               <div className="text-sm text-muted-foreground ml-4">https://your-website.com</div>
+              {state.unsavedChanges && (
+                <div className="ml-auto text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Unsaved changes</div>
+              )}
             </div>
             <div className="h-[calc(100%-60px)]">
               <WebsitePreview />
