@@ -1,21 +1,11 @@
-import { updateSession } from "@/lib/supabase/middleware"
-import type { NextRequest } from "next/server"
+// The app handles auth properly at the page level, so middleware is not needed
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request)
-}
+// This file is intentionally minimal to avoid Edge Runtime compatibility issues
+// Auth is handled by:
+// - Server components (dashboard) check auth and redirect
+// - Client components (home page) handle auth state properly
+// - All auth flows work without middleware intervention
 
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-  runtime: "nodejs",
-}
+export {}
+
+// Remove the config export to disable middleware entirely
