@@ -6,13 +6,13 @@
     <title>Poster2Web - Transform Documents into Beautiful Websites</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%221em%22 font-size=%2216%22>💚</text></svg>">
     
-     External Libraries 
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-     Tesseract.js for browser‑based OCR 
+    <!-- Tesseract.js for browser-based OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     
-     Set PDF.js worker 
+    <!-- Set PDF.js worker -->
     <script>
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
@@ -21,39 +21,39 @@
         }
     </script>
     
-     Styles 
+    <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/accessibility.css">
     
-     Added meta tags for better SEO and accessibility 
+    <!-- Added meta tags for better SEO and accessibility -->
     <meta name="description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
     <meta name="keywords" content="PDF to website, document converter, website builder, responsive design">
     <meta name="author" content="Poster2Web">
     <meta name="theme-color" content="#16a34a">
     
-     Open Graph / Facebook 
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://poster2web.com/">
     <meta property="og:title" content="Poster2Web - Transform Documents into Beautiful Websites">
     <meta property="og:description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
     
-     Twitter 
+    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://poster2web.com/">
     <meta property="twitter:title" content="Poster2Web - Transform Documents into Beautiful Websites">
     <meta property="twitter:description" content="Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.">
 </head>
 <body>
-     Added main landmark for better accessibility 
+    <!-- Added main landmark for better accessibility -->
     <main role="main">
-         Auto-save Indicator 
+        <!-- Auto-save Indicator -->
         <div id="autosaveIndicator" class="autosave-indicator" role="status" aria-live="polite">💾 Saved</div>
         
-         Toast Notification 
+        <!-- Toast Notification -->
         <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
 
         <div class="main-content" id="main-content">
-             UPLOAD SCREEN 
+            <!-- UPLOAD SCREEN -->
             <div id="uploadScreen" class="screen active">
                 <div class="header-icons">
                     <button class="icon-button" onclick="showInfo()" title="About Poster2Web" aria-label="About Poster2Web">
@@ -65,7 +65,7 @@
                 </div>
 
                 <div style="max-width: 1200px; margin: 0 auto; padding: 64px 20px 40px;">
-                     Enhanced Hero Section 
+                    <!-- Enhanced Hero Section -->
                     <header style="text-align: center; margin-bottom: 56px;">
                         <div style="display: inline-flex; align-items: center; background: linear-gradient(135deg, var(--primary) 0%, hsl(142 76% 45%) 100%); color: white; padding: 10px 28px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 32px; box-shadow: var(--shadow-md); border: 1px solid hsl(142 76% 86% / 0.5); backdrop-filter: blur(10px); letter-spacing: 0.025em;" aria-label="Feature highlight">
                             <span aria-hidden="true">⚡</span> Single Page Websites in a Flash <span aria-hidden="true">⚡</span>
@@ -79,7 +79,7 @@
                         </p>
                     </header>
 
-                     Enhanced Upload Container 
+                    <!-- Enhanced Upload Container -->
                     <div class="upload-container">
                         <div id="dropZone" class="drop-zone" role="button" tabindex="0" aria-label="File upload area. Click or drag files here to upload." aria-describedby="upload-instructions">
                             <input type="file" id="fileInput" accept=".pdf,.pptx,.txt,.html,.htm,.png,.jpg,.jpeg" aria-label="Choose file to upload">
@@ -109,7 +109,7 @@
                         </div>
                     </div>
 
-                     Features Preview Section 
+                    <!-- Features Preview Section -->
                     <section style="margin-top: 80px; text-align: center;" aria-labelledby="features-heading">
                         <h2 id="features-heading" style="font-size: 24px; font-weight: 700; color: var(--foreground); margin-bottom: 16px; letter-spacing: -0.01em;">
                             Why Choose Poster2Web?
@@ -147,22 +147,22 @@
                 </div>
             </div>
 
-             LOADING SCREEN 
+            <!-- LOADING SCREEN -->
             <div id="loadingScreen" class="screen loading-screen">
                 <div class="loading-container">
                     <div class="loading-spinner" role="status" aria-label="Loading"></div>
                     <h2 id="loadingTitle" class="loading-title">Processing your file</h2>
                     <p id="loadingMessage" class="loading-message">Extracting content and analyzing structure...</p>
-                     Progress bar container. The bar itself will be updated via JS. Using inline styles and CSS variables ensures it inherits the existing design system without adding new classes. 
+                    <!-- Progress bar container. The bar itself will be updated via JS. Using inline styles and CSS variables ensures it inherits the existing design system without adding new classes. -->
                     <div id="loadingProgress" style="width:100%; height:8px; border-radius: var(--radius-lg); background: var(--muted); overflow: hidden; margin-top: 12px; display: none;" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                         <div id="loadingProgressFill" style="height:100%; width:0%; background: var(--primary); transition: width 0.3s ease;"></div>
                     </div>
                 </div>
             </div>
 
-             EDITOR SCREEN 
+            <!-- EDITOR SCREEN -->
             <div id="editorScreen" class="screen">
-                 Editor Header 
+                <!-- Editor Header -->
                 <div class="editor-header">
                     <button id="backButton" class="back-button" aria-label="Go back to upload screen">
                         ← Back to Upload
@@ -184,7 +184,7 @@
                     </div>
                 </div>
 
-                 Tabs 
+                <!-- Tabs -->
                 <div class="tabs" role="tablist" aria-label="Editor sections">
                     <div class="tab active" data-tab="content" onclick="switchTab('content')" role="tab" tabindex="0" aria-selected="true" aria-controls="contentTab" id="content-tab">
                         <span aria-hidden="true">📝</span> Content
@@ -197,11 +197,11 @@
                     </div>
                 </div>
 
-                 Editor Content 
+                <!-- Editor Content -->
                 <div class="editor-content" id="editor-content">
-                     Left Side: Form/Editor 
+                    <!-- Left Side: Form/Editor -->
                     <div class="form-section">
-                         Content Tab 
+                        <!-- Content Tab -->
                         <div id="contentTab" class="tab-content active" role="tabpanel" aria-labelledby="content-tab">
                             <div class="sections-header">
                                 <h2 class="sections-title"><span aria-hidden="true">📄</span> Sections</h2>
@@ -210,15 +210,15 @@
                                 </button>
                             </div>
                             <div id="sectionsContainer" role="region" aria-label="Content sections">
-                                 Sections will be dynamically added here 
+                                <!-- Sections will be dynamically added here -->
                             </div>
                         </div>
 
-                         Design Tab 
+                        <!-- Design Tab -->
                         <div id="designTab" class="tab-content" role="tabpanel" aria-labelledby="design-tab">
                             <h2 style="margin-bottom: 24px;"><span aria-hidden="true">🎨</span> Design Settings</h2>
                             
-                             Color Scheme 
+                            <!-- Color Scheme -->
                             <div class="form-group">
                                 <label class="form-label" for="colorScheme">
                                     Color Scheme
@@ -238,7 +238,7 @@
                                 <span id="colorScheme-help" class="sr-only">Select a predefined color scheme for your website</span>
                             </div>
 
-                             Custom Colors 
+                            <!-- Custom Colors -->
                             <div class="form-group">
                                 <label class="form-label" for="primaryColor">Primary Color</label>
                                 <div class="color-picker">
@@ -255,7 +255,7 @@
                                 </div>
                             </div>
 
-                             Logo Upload 
+                            <!-- Logo Upload -->
                             <div class="form-group">
                                 <label class="form-label">
                                     Logo
@@ -269,7 +269,7 @@
                                 <span id="logo-help" class="sr-only">Upload an image file to use as your website logo</span>
                             </div>
 
-                             Logo Size 
+                            <!-- Logo Size -->
                             <div class="form-group">
                                 <label class="form-label" for="logoSize">Logo Size</label>
                                 <div class="range-group">
@@ -278,7 +278,7 @@
                                 </div>
                             </div>
 
-                             Header Alignment 
+                            <!-- Header Alignment -->
                             <div class="form-group">
                                 <label class="form-label" for="headerAlignment">Header Alignment</label>
                                 <select id="headerAlignment" class="form-select">
@@ -288,7 +288,7 @@
                                 </select>
                             </div>
 
-                             Typography 
+                            <!-- Typography -->
                             <div class="form-group">
                                 <label class="form-label" for="fontStyle">Font Style</label>
                                 <select id="fontStyle" class="form-select">
@@ -314,7 +314,7 @@
                                 </div>
                             </div>
 
-                             Layout Style 
+                            <!-- Layout Style -->
                             <div class="form-group">
                                 <label class="form-label" for="layoutStyle">
                                     Layout Style
@@ -328,11 +328,11 @@
                             </div>
                         </div>
 
-                         UPDATED Settings Tab 
+                        <!-- UPDATED Settings Tab -->
                         <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
                             <h2 style="margin-bottom: 24px;"><span aria-hidden="true">⚙️</span> Settings</h2>
                             
-                             Custom Buttons Manager 
+                            <!-- Custom Buttons Manager -->
                             <div class="form-group">
                                 <label class="form-label">
                                     <span aria-hidden="true">🔘</span> Custom Buttons
@@ -345,13 +345,13 @@
                                     <button type="button" class="btn btn-small btn-primary" onclick="addButton('email')" aria-label="Add email button">+ Email Button</button>
                                 </div>
                             </div>
-                             Button Preview 
+                            <!-- Button Preview -->
                             <div class="form-group">
                                 <label class="form-label">Button Preview</label>
                                 <div id="buttonPreview" class="custom-buttons-preview" style="padding: 16px; background: var(--muted); border-radius: var(--radius-lg); text-align: center;" role="region" aria-label="Button preview" aria-live="polite"></div>
                             </div>
 
-                             Analytics Code 
+                            <!-- Analytics Code -->
                             <div class="form-group">
                                 <label class="form-label" for="analyticsCode">
                                     <span aria-hidden="true">📊</span> Analytics Code
@@ -363,7 +363,7 @@
                         </div>
                     </div>
 
-                     Right Side: Preview 
+                    <!-- Right Side: Preview -->
                     <div class="preview-section" id="preview-content">
                         <div class="preview-container">
                             <div class="preview-header">
@@ -374,7 +374,7 @@
                                 </div>
                                 <span class="preview-url">https://your-website.com</span>
                             </div>
-                             The iframe is wrapped to offset it by the faux browser header height. 
+                            <!-- The iframe is wrapped to offset it by the faux browser header height. -->
                             <div class="preview-iframe-wrapper">
                                 <iframe id="websitePreview" class="preview-iframe" srcdoc="<h1>Loading preview...</h1>" title="Website preview" aria-label="Live preview of your website"></iframe>
                             </div>
@@ -385,7 +385,7 @@
         </div>
     </main>
 
-     Preview Modal 
+    <!-- Preview Modal -->
     <div id="previewModal" class="modal" role="dialog" aria-labelledby="preview-modal-title" aria-hidden="true" aria-modal="true">
         <div class="modal-content large">
             <button class="close-btn" onclick="closePreviewModal()" aria-label="Close preview modal">✕</button>
@@ -414,7 +414,7 @@
         </div>
     </div>
 
-     Export Modal 
+    <!-- Export Modal -->
     <div id="exportModal" class="modal" role="dialog" aria-labelledby="export-modal-title" aria-hidden="true" aria-modal="true">
         <div class="modal-content">
             <button class="close-btn" onclick="closeExportModal()" aria-label="Close export modal">✕</button>
@@ -506,7 +506,7 @@
         </div>
     </div>
 
-     Info Modal 
+    <!-- Info Modal -->
     <div id="infoModal" class="modal" role="dialog" aria-labelledby="info-modal-title" aria-hidden="true" aria-modal="true">
         <div class="modal-content">
             <button class="close-btn" onclick="closeInfoModal()" aria-label="Close info modal">✕</button>
@@ -529,8 +529,8 @@
                     <div style="color: var(--muted-foreground);">Download clean HTML, a React component, or a Next.js page.</div>
                 </div>
                 <div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px;" role="listitem">
-                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🧩</span> Add‑ons</h4>
-                    <div style="color: var(--muted-foreground);">Custom buttons (email, phone, links, downloads), print‑optimized mode, and SEO tags.</div>
+                    <h4 style="margin:0 0 6px; color: var(--foreground);"><span aria-hidden="true">🧩</span> Add-ons</h4>
+                    <div style="color: var(--muted-foreground);">Custom buttons (email, phone, links, downloads), print-optimized mode, and SEO tags.</div>
                 </div>
             </div>
             <div style="display:flex; gap:12px; margin-top: 16px;">
@@ -548,7 +548,7 @@
         </div>
     </footer>
 
-     Added error handling and dependency checks for JavaScript modules 
+    <!-- Enhanced error handling and dependency checks for JavaScript modules -->
     <script>
         // Check if required dependencies are loaded
         if (typeof pdfjsLib === 'undefined') {
@@ -560,9 +560,12 @@
         if (typeof Tesseract === 'undefined') {
             console.warn('Tesseract.js not loaded - OCR processing will be unavailable');
         }
+        
+        // Set global debug flag for development
+        window.DEBUG_STATE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     </script>
     
-     Load JavaScript modules in correct order 
+    <!-- Load JavaScript modules in correct order -->
     <script src="js/utils.js"></script>
     <script src="js/state.js"></script>
     <script src="js/fileHandlers.js"></script>

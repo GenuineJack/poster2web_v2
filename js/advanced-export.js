@@ -3,8 +3,7 @@
  * Extended export functionality with PDF, Markdown, Vue.js, and deployment integrations
  */
 
-// Import JSZip library
-import JSZip from "jszip"
+// JSZip is loaded via CDN in index.html
 
 // ===================================================
 // PDF EXPORT FUNCTIONALITY
@@ -481,12 +480,10 @@ function generateVueExport(project, settings) {
 </template>
 
 <script>
-import { ref } from 'vue'
-
 export default {
   name: 'WebsiteComponent',
   setup() {
-    ${layoutStyle === "menu" ? "const menuOpen = ref(false)" : ""}
+    ${layoutStyle === "menu" ? "const menuOpen = false" : ""}
     
     const sections = ${JSON.stringify(project.sections, null, 4)}
     const logoUrl = ${project.logoUrl ? `'${project.logoUrl}'` : "null"}
@@ -505,7 +502,7 @@ export default {
       layoutStyle === "menu"
         ? `
     const toggleMenu = () => {
-      menuOpen.value = !menuOpen.value
+      menuOpen = !menuOpen
     }`
         : ""
     }
@@ -557,7 +554,7 @@ export default {
   padding: 40px;
   margin-bottom: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .section h2 {
@@ -929,6 +926,13 @@ For questions about Poster2Web, visit our documentation or contact support.`
  * Create and download deployment package as ZIP
  */
 async function downloadDeploymentPackage(project, settings, platform) {
+  const JSZip = window.JSZip // Declare JSZip variable
+
+  if (typeof JSZip === "undefined") {
+    console.error("JSZip not available - cannot create deployment package")
+    return { success: false, error: "JSZip library not loaded" }
+  }
+
   const files = generateDeploymentPackage(project, settings, platform)
   const zip = new JSZip()
 

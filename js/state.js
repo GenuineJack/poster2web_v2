@@ -286,7 +286,7 @@ const autoSaveMiddleware = (updates, prevState, { source }) => {
  * Logging middleware for development
  */
 const loggingMiddleware = (updates, prevState, { source }) => {
-  if (process.env.NODE_ENV === "development" || window.DEBUG_STATE) {
+  if (window.DEBUG_STATE || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
     console.group(`🔄 State Update [${source}]`)
     console.log("Updates:", updates)
     console.log("Previous State:", prevState)
