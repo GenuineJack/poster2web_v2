@@ -1,8 +1,64 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
+  "name": "poster2web",
+  "version": "1.0.0",
   "private": true,
+  "description": "Transform PDFs, PowerPoints, and documents into beautiful, responsive websites in minutes. No coding required.",
+  "keywords": [
+    "html",
+    "javascript",
+    "pdf-converter",
+    "website-builder",
+    "static-site"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/poster2web.git"
+  },
+  "license": "MIT",
+  "author": "Jack",
+  "main": "index.html",
   "scripts": {
-    "build": "echo 'no build script'"
+    "build": "mkdir -p dist && cp index.html dist/ && cp -r css dist/ && cp -r js dist/ && cp -r public/* dist/ && echo 'Build completed successfully - files ready in dist/'",
+    "deploy": "npm run build",
+    "dev": "echo 'Open index.html in browser'",
+    "start": "echo 'Open index.html in browser'"
+  },
+  "dependencies": {
+    "@radix-ui/react-checkbox": "latest",
+    "@radix-ui/react-progress": "latest",
+    "@radix-ui/react-scroll-area": "latest",
+    "@radix-ui/react-separator": "latest",
+    "@radix-ui/react-slider": "latest",
+    "@radix-ui/react-slot": "latest",
+    "@radix-ui/react-switch": "latest",
+    "@radix-ui/react-tabs": "latest",
+    "@radix-ui/react-toggle": "latest",
+    "@radix-ui/react-tooltip": "latest",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "immer": "latest",
+    "input-otp": "latest",
+    "jszip": "latest",
+    "lucide-react": "^0.454.0",
+    "next": "15.2.4",
+    "react": "^19",
+    "react-day-picker": "latest",
+    "react-dom": "^19",
+    "recharts": "latest",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "use-sync-external-store": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8.5",
+    "tailwindcss": "4.1.13",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

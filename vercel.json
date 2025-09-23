@@ -3,6 +3,8 @@
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
+  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
   "headers": [
     {
       "source": "/(.*)",

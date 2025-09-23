@@ -78,20 +78,6 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
 # Temporary folders
 tmp/
 temp/
@@ -108,3 +94,6 @@ temp/
 
 # Local development
 .vercel
+
+# Build info
+build-info.json
