@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/client"
 import type { Section, Project, Settings } from "@/hooks/use-app-state"
+import { ErrorHandler } from "./error-handler"
+import { withRetry, retryConfigs } from "./retry-utils"
+import { withCache, cacheConfigs } from "./cache-utils"
 
 export interface DatabaseProject {
   id: string
@@ -43,22 +46,60 @@ export interface DatabaseAsset {
 export const database = {
   // Projects
   async getProjects(): Promise<DatabaseProject[]> {
-    const supabase = createClient()
-    const { data, error } = await supabase.from("projects").select("*").order("updated_at", { ascending: false })
+    return withRetry(async () => {
+      const supabase = createClient()
+      try {
+        const { data, error } = await supabase.from("projects").select("*").order("updated_at", { ascending: false })
 
-    if (error) throw error
-    return data || []
+        if (error) {
+          const appError = ErrorHandler.handleDatabaseError(error)
+          ErrorHandler.logError(appError)
+          throw appError
+        }
+        return data || []
+      } catch (error) {
+        if (error instanceof Error && "code" in error) {
+          throw error // Already handled AppError
+        }
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+    }, retryConfigs.database)
   },
 
   async getProject(id: string): Promise<DatabaseProject | null> {
-    const supabase = createClient()
-    const { data, error } = await supabase.from("projects").select("*").eq("id", id).single()
+    const cachedFn = withCache(
+      async (projectId: string) => {
+        return withRetry(async () => {
+          const supabase = createClient()
+          try {
+            const { data, error } = await supabase.from("projects").select("*").eq("id", projectId).single()
 
-    if (error) {
-      if (error.code === "PGRST116") return null // Not found
-      throw error
-    }
-    return data
+            if (error) {
+              const appError = ErrorHandler.handleDatabaseError(error)
+              if (appError.code === "NOT_FOUND") {
+                return null
+              }
+              ErrorHandler.logError(appError)
+              throw appError
+            }
+            return data
+          } catch (error) {
+            if (error instanceof Error && "code" in error) {
+              throw error // Already handled AppError
+            }
+            const appError = ErrorHandler.handleDatabaseError(error)
+            ErrorHandler.logError(appError)
+            throw appError
+          }
+        }, retryConfigs.database)
+      },
+      (projectId: string) => `project:${projectId}`,
+      cacheConfigs.projects,
+    )
+
+    return cachedFn(id)
   },
 
   async createProject(project: {
@@ -69,27 +110,49 @@ export const database = {
     theme_settings?: Settings
   }): Promise<DatabaseProject> {
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-    if (!user) throw new Error("User not authenticated")
+      if (!user) {
+        const appError = ErrorHandler.createError(
+          "USER_NOT_AUTHENTICATED",
+          "User not authenticated",
+          "Please log in to create a project.",
+          "high",
+        )
+        ErrorHandler.logError(appError)
+        throw appError
+      }
 
-    const { data, error } = await supabase
-      .from("projects")
-      .insert({
-        user_id: user.id,
-        title: project.title,
-        description: project.description || null,
-        original_filename: project.original_filename || null,
-        file_type: project.file_type || null,
-        theme_settings: project.theme_settings || {},
-      })
-      .select()
-      .single()
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({
+          user_id: user.id,
+          title: project.title,
+          description: project.description || null,
+          original_filename: project.original_filename || null,
+          file_type: project.file_type || null,
+          theme_settings: project.theme_settings || {},
+        })
+        .select()
+        .single()
 
-    if (error) throw error
-    return data
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async updateProject(
@@ -102,30 +165,70 @@ export const database = {
     },
   ): Promise<DatabaseProject> {
     const supabase = createClient()
-    const { data, error } = await supabase.from("projects").update(updates).eq("id", id).select().single()
+    try {
+      const { data, error } = await supabase.from("projects").update(updates).eq("id", id).select().single()
 
-    if (error) throw error
-    return data
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async deleteProject(id: string): Promise<void> {
     const supabase = createClient()
-    const { error } = await supabase.from("projects").delete().eq("id", id)
+    try {
+      const { error } = await supabase.from("projects").delete().eq("id", id)
 
-    if (error) throw error
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   // Project Sections
   async getProjectSections(projectId: string): Promise<DatabaseSection[]> {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from("project_sections")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("sort_order")
+    const cachedFn = withCache(
+      async (id: string) => {
+        return withRetry(async () => {
+          const supabase = createClient()
+          const { data, error } = await supabase
+            .from("project_sections")
+            .select("*")
+            .eq("project_id", id)
+            .order("sort_order")
 
-    if (error) throw error
-    return data || []
+          if (error) {
+            const appError = ErrorHandler.handleDatabaseError(error)
+            ErrorHandler.logError(appError)
+            throw appError
+          }
+          return data || []
+        }, retryConfigs.database)
+      },
+      (id: string) => `project_sections:${id}`,
+      cacheConfigs.projectSections,
+    )
+
+    return cachedFn(projectId)
   },
 
   async createSection(section: {

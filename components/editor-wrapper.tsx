@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, memo } from "react"
 import { useAppState, type Project, type Settings } from "@/hooks/use-app-state"
 import { EditorScreen } from "@/components/editor-screen"
 
@@ -10,7 +10,7 @@ interface EditorWrapperProps {
   settings: Settings
 }
 
-export function EditorWrapper({ initialProject, projectId, settings }: EditorWrapperProps) {
+export const EditorWrapper = memo(function EditorWrapper({ initialProject, projectId, settings }: EditorWrapperProps) {
   const { actions } = useAppState()
 
   useEffect(() => {
@@ -24,4 +24,4 @@ export function EditorWrapper({ initialProject, projectId, settings }: EditorWra
   }, [initialProject, projectId, settings, actions])
 
   return <EditorScreen />
-}
+})

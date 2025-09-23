@@ -10,14 +10,15 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { SecurityUtils } from "@/lib/security-utils"
 
-export function LoginForm() {
+export function SignUpForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const sanitizedEmail = SecurityUtils.sanitizeInput(email)
@@ -26,12 +27,23 @@ export function LoginForm() {
       return
     }
 
+    const passwordValidation = SecurityUtils.isValidPassword(password)
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.message!)
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
     const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email: sanitizedEmail,
         password,
         options: {
@@ -39,7 +51,7 @@ export function LoginForm() {
         },
       })
       if (error) throw error
-      router.push("/dashboard")
+      router.push("/auth/sign-up-success")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -48,7 +60,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4">
+    <form onSubmit={handleSignUp} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -70,7 +82,23 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={128}
+        />
+        <p className="text-xs text-muted-foreground">
+          Password must be at least 8 characters with uppercase, lowercase, and number
+        </p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          required
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          autoComplete="new-password"
           minLength={8}
           maxLength={128}
         />
@@ -81,7 +109,7 @@ export function LoginForm() {
         </p>
       )}
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Logging in..." : "Login"}
+        {isLoading ? "Creating account..." : "Create Account"}
       </Button>
     </form>
   )

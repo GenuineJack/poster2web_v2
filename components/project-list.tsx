@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, memo } from "react"
 import { Plus, FileText, Calendar, MoreHorizontal, Trash2, Edit, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,12 +15,36 @@ import { Badge } from "@/components/ui/badge"
 import { database, type DatabaseProject } from "@/lib/database"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
+import { ErrorHandler } from "@/lib/error-handler"
+import { useDebouncedCallback } from "@/hooks/use-debounce"
+import { Input } from "@/components/ui/input"
 
-export function ProjectList() {
+export const ProjectList = memo(function ProjectList() {
   const [projects, setProjects] = useState<DatabaseProject[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredProjects, setFilteredProjects] = useState<DatabaseProject[]>([])
+
+  const debouncedSearch = useDebouncedCallback((term: string) => {
+    if (!term.trim()) {
+      setFilteredProjects(projects)
+      return
+    }
+
+    const filtered = projects.filter(
+      (project) =>
+        project.title.toLowerCase().includes(term.toLowerCase()) ||
+        project.description?.toLowerCase().includes(term.toLowerCase()),
+    )
+    setFilteredProjects(filtered)
+  }, 300)
+
+  useEffect(() => {
+    debouncedSearch(searchTerm)
+  }, [searchTerm, projects, debouncedSearch])
 
   useEffect(() => {
     loadProjects()
@@ -28,19 +52,25 @@ export function ProjectList() {
 
   const loadProjects = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const data = await database.getProjects()
       setProjects(data)
-      setError(null)
-    } catch (error) {
+      setFilteredProjects(data)
+    } catch (error: any) {
       console.error("Error loading projects:", error)
-      if (error instanceof Error && error.message.includes("JWT")) {
-        setError("Please confirm your email address to access your projects.")
+
+      if (error.code) {
+        // Already an AppError
+        setError(error.userMessage)
       } else {
-        setError("Failed to load projects. Please try refreshing the page.")
+        const appError = ErrorHandler.handleDatabaseError(error)
+        setError(appError.userMessage)
       }
+
       toast({
         title: "Error",
-        description: "Failed to load projects",
+        description: error.userMessage || "Failed to load projects",
         variant: "destructive",
       })
     } finally {
@@ -55,21 +85,16 @@ export function ProjectList() {
         description: "A new website project",
       })
       router.push(`/editor/${project.id}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating project:", error)
-      if (error instanceof Error && error.message.includes("JWT")) {
-        toast({
-          title: "Email Confirmation Required",
-          description: "Please confirm your email address before creating projects.",
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to create project",
-          variant: "destructive",
-        })
-      }
+
+      const appError = error.code ? error : ErrorHandler.handleDatabaseError(error)
+
+      toast({
+        title: "Error",
+        description: appError.userMessage,
+        variant: "destructive",
+      })
     }
   }
 
@@ -78,16 +103,28 @@ export function ProjectList() {
 
     try {
       await database.deleteProject(id)
-      setProjects(projects.filter((p) => p.id !== id))
+      const updatedProjects = projects.filter((p) => p.id !== id)
+      setProjects(updatedProjects)
+      setFilteredProjects(
+        updatedProjects.filter(
+          (p) =>
+            !searchTerm.trim() ||
+            p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
+      )
       toast({
         title: "Success",
         description: "Project deleted successfully",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting project:", error)
+
+      const appError = error.code ? error : ErrorHandler.handleDatabaseError(error)
+
       toast({
         title: "Error",
-        description: "Failed to delete project",
+        description: appError.userMessage,
         variant: "destructive",
       })
     }
@@ -128,18 +165,85 @@ export function ProjectList() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "published":
-        return "bg-green-100 text-green-800"
-      case "draft":
-        return "bg-yellow-100 text-yellow-800"
-      case "archived":
-        return "bg-gray-100 text-gray-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  const ProjectCard = memo(function ProjectCard({
+    project,
+    onDelete,
+    onDuplicate,
+    onEdit,
+  }: {
+    project: DatabaseProject
+    onDelete: (id: string) => void
+    onDuplicate: (project: DatabaseProject) => void
+    onEdit: (id: string) => void
+  }) {
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case "published":
+          return "bg-green-100 text-green-800"
+        case "draft":
+          return "bg-yellow-100 text-yellow-800"
+        case "archived":
+          return "bg-gray-100 text-gray-800"
+        default:
+          return "bg-gray-100 text-gray-800"
+      }
     }
-  }
+
+    return (
+      <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg truncate">{project.title}</CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className={getStatusColor(project.status)}>
+                  {project.status}
+                </Badge>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(project.updated_at).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEdit(project.id)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onDuplicate(project)}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onDelete(project.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+        <CardContent onClick={() => onEdit(project.id)}>
+          <div className="space-y-2">
+            {project.description && <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <FileText className="h-3 w-3" />
+              {project.file_type || "Website"}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  })
 
   if (loading) {
     return (
@@ -191,81 +295,44 @@ export function ProjectList() {
           <h2 className="text-2xl font-bold">My Projects</h2>
           <p className="text-muted-foreground">Manage your website projects</p>
         </div>
-        <Button onClick={handleCreateProject} className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Project
-        </Button>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          <Button onClick={handleCreateProject} className="gap-2">
+            <Plus className="h-4 w-4" />
+            New Project
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <Card key={project.id} className="hover:shadow-md transition-shadow cursor-pointer group">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-lg truncate">{project.title}</CardTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary" className={getStatusColor(project.status)}>
-                      {project.status}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(project.updated_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => router.push(`/editor/${project.id}`)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDuplicateProject(project)}>
-                      <Copy className="h-4 w-4 mr-2" />
-                      Duplicate
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleDeleteProject(project.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent onClick={() => router.push(`/editor/${project.id}`)}>
-              <div className="space-y-2">
-                {project.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-                )}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <FileText className="h-3 w-3" />
-                  {project.file_type || "Website"}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {filteredProjects.map((project) => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            onDelete={handleDeleteProject}
+            onDuplicate={handleDuplicateProject}
+            onEdit={() => router.push(`/editor/${project.id}`)}
+          />
         ))}
 
-        {projects.length === 0 && (
+        {filteredProjects.length === 0 && !loading && (
           <Card className="col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
+              <h3 className="text-lg font-semibold mb-2">{searchTerm ? "No matching projects" : "No projects yet"}</h3>
               <p className="text-muted-foreground text-center mb-4">
-                Create your first project to start building beautiful websites from your documents.
+                {searchTerm
+                  ? "Try adjusting your search terms or create a new project."
+                  : "Create your first project to start building beautiful websites from your documents."}
               </p>
               <Button onClick={handleCreateProject} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Create Your First Project
+                {searchTerm ? "Create New Project" : "Create Your First Project"}
               </Button>
             </CardContent>
           </Card>
@@ -273,4 +340,4 @@ export function ProjectList() {
       </div>
     </div>
   )
-}
+})

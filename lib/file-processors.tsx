@@ -1,11 +1,17 @@
 "use client"
 
 import type { Section } from "@/hooks/use-app-state"
+import { ErrorHandler } from "./error-handler"
 
 export async function processFile(file: File): Promise<Section[]> {
   const fileExtension = file.name.split(".").pop()?.toLowerCase()
 
   try {
+    const maxSize = 50 * 1024 * 1024 // 50MB
+    if (file.size > maxSize) {
+      throw new Error("File size exceeds 50MB limit")
+    }
+
     switch (fileExtension) {
       case "pdf":
         return await processPDF(file)
@@ -32,6 +38,8 @@ export async function processFile(file: File): Promise<Section[]> {
         throw new Error(`Unsupported file type: ${fileExtension}`)
     }
   } catch (error) {
+    const appError = ErrorHandler.handleFileProcessingError(error, file.name)
+    ErrorHandler.logError(appError)
     console.error("File processing error:", error)
     // Fallback to basic sections
     return createBasicSections(file.name)
@@ -143,7 +151,13 @@ async function processText(file: File): Promise<Section[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 
+    const timeout = setTimeout(() => {
+      reader.abort()
+      reject(new Error("File processing timeout"))
+    }, 30000) // 30 second timeout
+
     reader.onload = (e) => {
+      clearTimeout(timeout)
       try {
         const text = e.target?.result as string
         const sections = parseTextIntoSections(text, file.name)
@@ -153,7 +167,16 @@ async function processText(file: File): Promise<Section[]> {
       }
     }
 
-    reader.onerror = () => reject(new Error("Failed to read text file"))
+    reader.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error("Failed to read text file"))
+    }
+
+    reader.onabort = () => {
+      clearTimeout(timeout)
+      reject(new Error("File reading was aborted"))
+    }
+
     reader.readAsText(file)
   })
 }
@@ -162,7 +185,13 @@ async function processMarkdown(file: File): Promise<Section[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 
+    const timeout = setTimeout(() => {
+      reader.abort()
+      reject(new Error("File processing timeout"))
+    }, 30000) // 30 second timeout
+
     reader.onload = (e) => {
+      clearTimeout(timeout)
       try {
         const markdown = e.target?.result as string
         const sections = parseMarkdownIntoSections(markdown, file.name)
@@ -172,7 +201,16 @@ async function processMarkdown(file: File): Promise<Section[]> {
       }
     }
 
-    reader.onerror = () => reject(new Error("Failed to read Markdown file"))
+    reader.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error("Failed to read Markdown file"))
+    }
+
+    reader.onabort = () => {
+      clearTimeout(timeout)
+      reject(new Error("File reading was aborted"))
+    }
+
     reader.readAsText(file)
   })
 }
@@ -181,7 +219,13 @@ async function processHTML(file: File): Promise<Section[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 
+    const timeout = setTimeout(() => {
+      reader.abort()
+      reject(new Error("File processing timeout"))
+    }, 30000) // 30 second timeout
+
     reader.onload = (e) => {
+      clearTimeout(timeout)
       try {
         const html = e.target?.result as string
         const sections = parseHTMLIntoSections(html, file.name)
@@ -191,7 +235,16 @@ async function processHTML(file: File): Promise<Section[]> {
       }
     }
 
-    reader.onerror = () => reject(new Error("Failed to read HTML file"))
+    reader.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error("Failed to read HTML file"))
+    }
+
+    reader.onabort = () => {
+      clearTimeout(timeout)
+      reject(new Error("File reading was aborted"))
+    }
+
     reader.readAsText(file)
   })
 }
@@ -200,7 +253,13 @@ async function processImage(file: File): Promise<Section[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 
+    const timeout = setTimeout(() => {
+      reader.abort()
+      reject(new Error("Image processing timeout"))
+    }, 30000) // 30 second timeout
+
     reader.onload = (e) => {
+      clearTimeout(timeout)
       try {
         const dataUrl = e.target?.result as string
         const sections = createImageSections(dataUrl, file.name)
@@ -210,7 +269,16 @@ async function processImage(file: File): Promise<Section[]> {
       }
     }
 
-    reader.onerror = () => reject(new Error("Failed to read image file"))
+    reader.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error("Failed to read image file"))
+    }
+
+    reader.onabort = () => {
+      clearTimeout(timeout)
+      reject(new Error("Image reading was aborted"))
+    }
+
     reader.readAsDataURL(file)
   })
 }

@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect, memo } from "react"
 import { Upload, FileText, ImageIcon, FileCode, Sparkles, AlertCircle, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { validateFile, getFileTypeInfo, formatFileSize } from "@/lib/file-validation"
@@ -12,10 +11,11 @@ interface FileUploadZoneProps {
   onFileUpload: (file: File) => void
 }
 
-export function FileUploadZone({ onFileUpload }: FileUploadZoneProps) {
+export const FileUploadZone = memo(function FileUploadZone({ onFileUpload }: FileUploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [validationResult, setValidationResult] = useState<ReturnType<typeof validateFile> | null>(null)
+  const [uploadTimeoutRef, setUploadTimeoutRef] = useState<NodeJS.Timeout | null>(null)
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -49,18 +49,24 @@ export function FileUploadZone({ onFileUpload }: FileUploadZoneProps) {
 
   const handleFileSelection = useCallback(
     (file: File) => {
+      if (uploadTimeoutRef) {
+        clearTimeout(uploadTimeoutRef)
+        setUploadTimeoutRef(null)
+      }
+
       setSelectedFile(file)
       const validation = validateFile(file)
       setValidationResult(validation)
 
       if (validation.isValid) {
-        // Auto-upload if valid
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           onFileUpload(file)
+          setUploadTimeoutRef(null)
         }, 500)
+        setUploadTimeoutRef(timeoutId)
       }
     },
-    [onFileUpload],
+    [onFileUpload, uploadTimeoutRef],
   )
 
   const handleClick = useCallback(() => {
@@ -73,6 +79,14 @@ export function FileUploadZone({ onFileUpload }: FileUploadZoneProps) {
       onFileUpload(selectedFile)
     }
   }, [selectedFile, onFileUpload])
+
+  useEffect(() => {
+    return () => {
+      if (uploadTimeoutRef) {
+        clearTimeout(uploadTimeoutRef)
+      }
+    }
+  }, [uploadTimeoutRef])
 
   return (
     <div className="space-y-4">
@@ -187,4 +201,4 @@ export function FileUploadZone({ onFileUpload }: FileUploadZoneProps) {
       )}
     </div>
   )
-}
+})
