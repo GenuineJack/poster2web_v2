@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className}>
-      <body>
+      <body className="min-h-screen bg-background font-sans antialiased">
         {children}
         <Toaster />
       </body>

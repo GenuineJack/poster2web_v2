@@ -20,11 +20,12 @@ export default function Page() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
+      const supabase = createClient()
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -42,7 +43,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Card>
