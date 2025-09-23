@@ -26,3 +26,16 @@ export async function createClient() {
     },
   })
 }
+
+export async function getUser() {
+  const supabase = await createClient()
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    return user
+  } catch (error) {
+    console.error("Error getting user:", error)
+    return null
+  }
+}

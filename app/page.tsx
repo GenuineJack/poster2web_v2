@@ -8,94 +8,44 @@ import { useRouter } from "next/navigation"
 
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [authChecked, setAuthChecked] = useState(false)
+  const [loading, setLoading] = useState(false) // Start with loading false to show page immediately
+  const [supabaseAvailable, setSupabaseAvailable] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Only check auth if we have the required environment variables
+        // Check if Supabase environment variables are available
         if (
           typeof window !== "undefined" &&
           process.env.NEXT_PUBLIC_SUPABASE_URL &&
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
         ) {
+          // Try to import and use Supabase, but don't let it block the page
           const { createClient } = await import("@/lib/supabase/client")
           const supabase = createClient()
 
+          setSupabaseAvailable(true)
+
           const {
-            data: { user },
+            data: { user: authUser },
           } = await supabase.auth.getUser()
 
-          setUser(user)
-          setAuthChecked(true)
-
-          // Only redirect if user is authenticated and we haven't already checked
-          if (user && !authChecked) {
+          if (authUser) {
+            setUser(authUser)
             router.push("/dashboard")
-            return
           }
-
-          // Set up auth state listener with proper cleanup
-          const {
-            data: { subscription },
-          } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log("[v0] Auth state change:", event)
-            if (event === "SIGNED_IN" && session?.user) {
-              setUser(session.user)
-              router.push("/dashboard")
-            } else if (event === "SIGNED_OUT") {
-              setUser(null)
-            }
-          })
-
-          // Return cleanup function
-          return () => {
-            console.log("[v0] Cleaning up auth subscription")
-            subscription.unsubscribe()
-          }
-        } else {
-          console.log("[v0] Supabase env vars not available")
-          setAuthChecked(true)
         }
       } catch (error) {
-        console.error("[v0] Auth check failed:", error)
-        setUser(null)
-        setAuthChecked(true)
-      } finally {
-        setLoading(false)
+        console.error("[v0] Supabase not available:", error)
+        // Continue without auth - this is fine for the landing page
+        setSupabaseAvailable(false)
       }
     }
 
-    if (!authChecked) {
-      const cleanup = checkAuth()
-      return () => {
-        if (cleanup instanceof Promise) {
-          cleanup.then((cleanupFn) => cleanupFn?.())
-        }
-      }
-    }
-  }, [router, authChecked])
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    )
-  }
-
-  if (user && authChecked) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Redirecting to dashboard...</p>
-        </div>
-      </div>
-    )
-  }
+    // Don't block the page load - run auth check in background
+    checkAuth()
+  }, [router])
 
   return (
     <div className="flex min-h-screen flex-col">

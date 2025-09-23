@@ -26,9 +26,16 @@ export async function middleware(request: NextRequest) {
   )
 
   // IMPORTANT: Do not run code between createServerClient and supabase.auth.getUser()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    user = authUser
+  } catch (error) {
+    console.error("Auth error in middleware:", error)
+    // Continue with null user if auth fails
+  }
 
   // Redirect unauthenticated users away from protected routes
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
