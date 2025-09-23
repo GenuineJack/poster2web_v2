@@ -17,16 +17,37 @@ Transform PDFs, PowerPoints, and documents into beautiful, responsive websites i
 
 ## 🛠 Technology Stack
 
-- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
-- **Styling**: CSS Custom Properties, Flexbox/Grid, Responsive Design
+- **Frontend**: Next.js 15 + React 19 (for v0 preview) + Vanilla JavaScript (for full functionality)
+- **Styling**: Tailwind CSS v4 + CSS Custom Properties
 - **Libraries**: 
   - PDF.js for PDF processing
   - JSZip for PowerPoint extraction
   - Tesseract.js for OCR functionality
-- **Build**: Static site (no build process required)
+  - Radix UI for component primitives
+- **Build**: Next.js (preview) + Static HTML (full app)
 - **Deployment**: Vercel, Netlify, GitHub Pages ready
 
 ## 📦 Quick Start
+
+### Development Modes
+
+This project supports two development modes:
+
+#### 1. Next.js Mode (v0 Preview)
+For development in v0 or basic preview:
+\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+Visit `http://localhost:3000` - Shows a preview interface with instructions.
+
+#### 2. HTML Mode (Full Functionality)
+For complete Poster2Web functionality with file upload:
+\`\`\`bash
+npm install
+npm run html-dev
+\`\`\`
+Visit `http://localhost:3000` - Full HTML application with all features.
 
 ### Option 1: Direct Deployment
 
@@ -44,17 +65,21 @@ Transform PDFs, PowerPoints, and documents into beautiful, responsive websites i
    cd poster2web
    \`\`\`
 
-2. **Open in browser:**
+2. **Install dependencies:**
    \`\`\`bash
-   # Simply open index.html in your browser
-   open index.html
-   # or use a local server
-   python -m http.server 8000
-   # or
-   npx serve .
+   npm install
    \`\`\`
 
-3. **Start building websites!**
+3. **Choose your development mode:**
+   \`\`\`bash
+   # For full HTML functionality
+   npm run html-dev
+   
+   # For Next.js preview mode
+   npm run dev
+   \`\`\`
+
+4. **Start building websites!**
 
 ## 🎯 Usage
 
@@ -91,10 +116,32 @@ Transform PDFs, PowerPoints, and documents into beautiful, responsive websites i
 
 ## 🔧 Configuration
 
+### Available Scripts
+
+\`\`\`bash
+# Next.js development (v0 preview)
+npm run dev
+
+# HTML development (full functionality)
+npm run html-dev
+
+# Build Next.js app
+npm run build
+
+# Build HTML static files
+npm run html-build
+
+# Start production Next.js server
+npm start
+\`\`\`
+
 ### Environment Variables (Optional)
 \`\`\`bash
 # For enhanced OCR processing
 GOOGLE_VISION_API_KEY=your_api_key_here
+
+# Port configuration
+PORT=3000
 \`\`\`
 
 ### Custom Deployment

@@ -715,8 +715,12 @@ function generateReactExport(project, settings) {
     })
     .join("\n            ")
 
-  return `import React, { useState } from 'react';
-import styled from 'styled-components';
+  return `// React Component - Copy this code into your React project
+// Note: You'll need to install styled-components: npm install styled-components
+
+const React = window.React || require('react');
+const styled = window.styled || require('styled-components');
+const { useState } = React;
 
 // Styled Components
 const Container = styled.div\`
@@ -953,7 +957,14 @@ const WebsiteComponent = () => {
   );
 };
 
-export default WebsiteComponent;`
+// Export for use in other files
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = WebsiteComponent;
+} else if (typeof window !== 'undefined') {
+  window.WebsiteComponent = WebsiteComponent;
+}
+
+// For React projects, use: export default WebsiteComponent;`
 }
 
 // ===================================================
@@ -981,7 +992,8 @@ function generateNextJSExport(project, settings) {
 
   return `'use client';
 
-import { useState } from 'react';
+// Note: This is a Next.js component. Make sure you have React installed.
+const { useState } = require('react');
 
 export default function Page() {
   ${layoutStyle === "menu" ? "const [menuOpen, setMenuOpen] = useState(false);" : ""}
@@ -1136,8 +1148,7 @@ export default function Page() {
                 return `<a href="${href}" target="_blank" rel="noopener noreferrer" className="pdf-download">${text}</a>`
               }
             })
-            .join("\n          ")}
-        </div>`
+            .join("\n          ")}</div>`
             : ""
         }
       </div>

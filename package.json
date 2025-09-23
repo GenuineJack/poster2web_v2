@@ -8,7 +8,9 @@
     "javascript",
     "pdf-converter",
     "website-builder",
-    "static-site"
+    "static-site",
+    "nextjs",
+    "react"
   ],
   "repository": {
     "type": "git",
@@ -18,10 +20,12 @@
   "author": "Jack",
   "main": "index.html",
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/ && cp -r css dist/ && cp -r js dist/ && cp -r public/* dist/ && echo 'Build completed successfully - files ready in dist/'",
+    "build": "next build",
     "deploy": "npm run build",
-    "dev": "echo 'Open index.html in browser'",
-    "start": "echo 'Open index.html in browser'"
+    "dev": "next dev",
+    "html-build": "mkdir -p dist && cp index.html dist/ && cp -r css dist/ && cp -r js dist/ && cp -r public/* dist/ && echo 'Build completed successfully - files ready in dist/'",
+    "html-dev": "node server.js",
+    "start": "next start"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "latest",
@@ -36,11 +40,14 @@
     "@radix-ui/react-tooltip": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fs": "latest",
+    "http": "latest",
     "immer": "latest",
     "input-otp": "latest",
     "jszip": "3.10.1",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
+    "path": "latest",
     "react": "^19",
     "react-day-picker": "latest",
     "react-dom": "^19",
@@ -55,7 +62,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",
-    "tailwindcss": "4.1.13",
+    "tailwindcss": "^4.1.9",
     "typescript": "^5"
   },
   "engines": {
