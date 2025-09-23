@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { serverDatabase, databaseProjectToAppProject } from "@/lib/database"
+import { serverDatabase } from "@/lib/server-database"
+import { databaseProjectToAppProject } from "@/lib/database"
 import { EditorWrapper } from "@/components/editor-wrapper"
 
 interface EditorPageProps {
