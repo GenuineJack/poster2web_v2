@@ -1,4 +1,10 @@
 export function validateEnvironmentVariables() {
+  // Skip validation during build time if environment variables are not available
+  if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    console.log("[v0] Skipping environment validation during build time")
+    return false
+  }
+
   const requiredEnvVars = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -41,7 +47,16 @@ export function validateEnvironmentVariables() {
 }
 
 export function getValidatedEnvVars() {
-  validateEnvironmentVariables()
+  const isValid = validateEnvironmentVariables()
+
+  // Return fallback values during build time
+  if (!isValid) {
+    return {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+      supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key",
+    }
+  }
+
   return {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

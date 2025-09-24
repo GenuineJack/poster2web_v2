@@ -9,10 +9,15 @@ import { getValidatedEnvVars } from "../env-validation"
  */
 export async function createClient() {
   try {
-    const cookieStore = await cookies()
     const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
 
-    return createServerClient(supabaseUrl, supabaseAnonKey, {
+    if (!supabaseUrl || supabaseUrl === "https://placeholder.supabase.co") {
+      throw new Error("Supabase URL not configured properly for server client")
+    }
+
+    const cookieStore = await cookies()
+
+    const client = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -28,6 +33,9 @@ export async function createClient() {
         },
       },
     })
+
+    console.log("[v0] Supabase server client created successfully")
+    return client
   } catch (error) {
     console.error("[v0] Failed to create Supabase server client:", error)
     throw error

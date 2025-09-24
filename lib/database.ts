@@ -48,6 +48,16 @@ export const database = {
   async getProjects(): Promise<DatabaseProject[]> {
     return withRetry(async () => {
       const supabase = createClient()
+
+      if (!supabase) {
+        throw ErrorHandler.createError(
+          "CLIENT_NOT_AVAILABLE",
+          "Supabase client not available",
+          "Database connection not available. Please check your configuration.",
+          "high",
+        )
+      }
+
       try {
         const { data, error } = await supabase.from("projects").select("*").order("updated_at", { ascending: false })
 
@@ -240,21 +250,35 @@ export const database = {
     sort_order?: number
   }): Promise<DatabaseSection> {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from("project_sections")
-      .insert({
-        project_id: section.project_id,
-        section_type: section.section_type,
-        title: section.title,
-        content: section.content,
-        icon: section.icon || "📄",
-        sort_order: section.sort_order || 0,
-      })
-      .select()
-      .single()
 
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await supabase
+        .from("project_sections")
+        .insert({
+          project_id: section.project_id,
+          section_type: section.section_type,
+          title: section.title,
+          content: section.content,
+          icon: section.icon || "📄",
+          sort_order: section.sort_order || 0,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async updateSection(
@@ -268,30 +292,72 @@ export const database = {
     },
   ): Promise<DatabaseSection> {
     const supabase = createClient()
-    const { data, error } = await supabase.from("project_sections").update(updates).eq("id", id).select().single()
 
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await supabase.from("project_sections").update(updates).eq("id", id).select().single()
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async deleteSection(id: string): Promise<void> {
     const supabase = createClient()
-    const { error } = await supabase.from("project_sections").delete().eq("id", id)
 
-    if (error) throw error
+    try {
+      const { error } = await supabase.from("project_sections").delete().eq("id", id)
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   // Project Assets
   async getProjectAssets(projectId: string): Promise<DatabaseAsset[]> {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from("project_assets")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false })
 
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from("project_assets")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data || []
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async createAsset(asset: {
@@ -304,17 +370,45 @@ export const database = {
     metadata?: Record<string, any>
   }): Promise<DatabaseAsset> {
     const supabase = createClient()
-    const { data, error } = await supabase.from("project_assets").insert(asset).select().single()
 
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await supabase.from("project_assets").insert(asset).select().single()
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+      return data
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 
   async deleteAsset(id: string): Promise<void> {
     const supabase = createClient()
-    const { error } = await supabase.from("project_assets").delete().eq("id", id)
 
-    if (error) throw error
+    try {
+      const { error } = await supabase.from("project_assets").delete().eq("id", id)
+
+      if (error) {
+        const appError = ErrorHandler.handleDatabaseError(error)
+        ErrorHandler.logError(appError)
+        throw appError
+      }
+    } catch (error) {
+      if (error instanceof Error && "code" in error) {
+        throw error // Already handled AppError
+      }
+      const appError = ErrorHandler.handleDatabaseError(error)
+      ErrorHandler.logError(appError)
+      throw appError
+    }
   },
 }
 
