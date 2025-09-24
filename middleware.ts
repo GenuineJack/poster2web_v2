@@ -28,9 +28,17 @@ export async function middleware(request: NextRequest) {
       },
     })
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    let user = null
+    try {
+      const { data, error } = await supabase.auth.getUser()
+      if (error) {
+        console.log("[middleware] Auth error (expected for logged out users):", error.message)
+      } else {
+        user = data.user
+      }
+    } catch (authError) {
+      console.log("[middleware] Auth check failed (user not logged in):", authError)
+    }
 
     // Redirect unauthenticated users away from protected routes
     if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {

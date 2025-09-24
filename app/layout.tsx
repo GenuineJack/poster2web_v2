@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
@@ -38,8 +38,13 @@ export const metadata: Metadata = {
     title: "Poster2Web - Convert Posters to Websites",
     description: "Transform your poster designs into beautiful, responsive websites with AI-powered conversion.",
   },
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
-    generator: 'v0.app'
+  generator: "v0.app",
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({
