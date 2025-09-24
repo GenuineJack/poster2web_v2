@@ -1,5 +1,8 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { createBrowserClient } from "@supabase/ssr"
+import { getValidatedEnvVars } from "../env-validation"
 
 export function createClient() {
-  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }

@@ -31,8 +31,6 @@ export default function Page() {
           ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`
           : "/dashboard"
 
-      console.log("[v0] Attempting login with redirect:", redirectUrl)
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -42,14 +40,11 @@ export default function Page() {
       })
 
       if (error) {
-        console.error("[v0] Login error:", error)
         throw error
       }
 
-      console.log("[v0] Login successful:", data.user?.email)
       router.push("/dashboard")
     } catch (error: unknown) {
-      console.error("[v0] Login error:", error)
       if (error instanceof Error) {
         if (error.message.includes("Invalid login credentials")) {
           setError("Invalid email or password. Please check your credentials and try again.")
