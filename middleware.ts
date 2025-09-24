@@ -1,84 +1,69 @@
-export const runtime = "nodejs"
+export const runtime = 'nodejs';
 
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // Create ONE response and keep using it
+  const response = NextResponse.next();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+  // If Supabase isn’t configured, let the request pass through
   if (!supabaseUrl || !supabaseKey) {
-    console.error("[v0] Missing Supabase environment variables in middleware")
-    // Allow request to continue without auth if Supabase is not configured
-    return supabaseResponse
+    console.error('[v0] Missing Supabase env vars in middleware');
+    return response;
   }
 
   try {
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();      // ✅ read from request
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+          // ✅ write ONLY to the RESPONSE
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
         },
       },
-    })
+    });
 
-    // IMPORTANT: Do not run code between createServerClient and supabase.auth.getUser()
-    let user = null
-    try {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser()
-      user = authUser
-    } catch (error) {
-      console.error("[v0] Auth error in middleware:", error)
-      // Continue with null user if auth fails
-    }
+    // Do NOT run extra code between client creation and getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Redirect unauthenticated users away from protected routes
-    if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/auth/login"
-      return NextResponse.redirect(url)
+    if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/login';
+      return NextResponse.redirect(url);
     }
 
     // Redirect authenticated users away from auth pages
     if (
       user &&
-      (request.nextUrl.pathname.startsWith("/auth/login") || request.nextUrl.pathname.startsWith("/auth/sign-up"))
+      (request.nextUrl.pathname.startsWith('/auth/login') ||
+        request.nextUrl.pathname.startsWith('/auth/sign-up'))
     ) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/dashboard"
-      return NextResponse.redirect(url)
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
     }
 
-    return supabaseResponse
-  } catch (error) {
-    console.error("[v0] Middleware error:", error)
-    // Allow request to continue if middleware fails
-    return supabaseResponse
+    return response;
+  } catch (err) {
+    console.error('[v0] Middleware error:', err);
+    return response; // fail open rather than 500
   }
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // You can keep your current matcher; this one is equivalent
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-}
+};
