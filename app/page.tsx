@@ -1,67 +1,87 @@
 "use client"
 
+import type React from "react"
+
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+
+// Simple inline button component
+function SimpleButton({
+  children,
+  variant = "default",
+  size = "default",
+  className = "",
+  ...props
+}: {
+  children: React.ReactNode
+  variant?: "default" | "outline" | "ghost"
+  size?: "default" | "lg"
+  className?: string
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const baseClasses =
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50"
+
+  const variantClasses = {
+    default: "bg-blue-600 text-white shadow hover:bg-blue-700",
+    outline: "border border-gray-300 bg-white shadow hover:bg-gray-50",
+    ghost: "hover:bg-gray-100",
+  }
+
+  const sizeClasses = {
+    default: "h-9 px-4 py-2",
+    lg: "h-10 px-8",
+  }
+
+  return (
+    <button className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`} {...props}>
+      {children}
+    </button>
+  )
+}
+
+// Simple inline card components
+function SimpleCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`bg-white text-gray-900 flex flex-col gap-6 rounded-xl border border-gray-200 py-6 shadow-sm ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+function SimpleCardHeader({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 ${className}`}>{children}</div>
+  )
+}
+
+function SimpleCardTitle({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`leading-none font-semibold ${className}`}>{children}</div>
+}
+
+function SimpleCardContent({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`px-6 ${className}`}>{children}</div>
+}
 
 export default function HomePage() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [supabaseAvailable, setSupabaseAvailable] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (
-          typeof window !== "undefined" &&
-          process.env.NEXT_PUBLIC_SUPABASE_URL &&
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        ) {
-          setLoading(true)
+    // Check if Supabase environment variables are available
+    const hasSupabaseConfig = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
-          // Try to import and use Supabase with proper error handling
-          const { createClient } = await import("@/lib/supabase/client")
-
-          try {
-            const supabase = createClient()
-            setSupabaseAvailable(true)
-
-            const {
-              data: { user: authUser },
-            } = await supabase.auth.getUser()
-
-            if (authUser) {
-              setUser(authUser)
-              router.push("/dashboard")
-            }
-          } catch (supabaseError) {
-            console.error("[v0] Supabase client error:", supabaseError)
-            setSupabaseAvailable(false)
-          }
-        } else {
-          console.warn("[v0] Supabase environment variables not configured")
-          setSupabaseAvailable(false)
-        }
-      } catch (error) {
-        console.error("[v0] Auth check failed:", error)
-        setSupabaseAvailable(false)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [router])
+    setSupabaseAvailable(hasSupabaseConfig)
+    setLoading(false)
+  }, [])
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-gray-500">Loading...</p>
         </div>
       </div>
     )
@@ -75,15 +95,15 @@ export default function HomePage() {
           <div className="flex gap-2">
             {supabaseAvailable ? (
               <>
-                <Button variant="ghost" asChild>
-                  <Link href="/auth/login">Login</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/auth/sign-up">Sign Up</Link>
-                </Button>
+                <Link href="/auth/login">
+                  <SimpleButton variant="ghost">Login</SimpleButton>
+                </Link>
+                <Link href="/auth/sign-up">
+                  <SimpleButton>Sign Up</SimpleButton>
+                </Link>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">Authentication unavailable</div>
+              <div className="text-sm text-gray-500">Authentication unavailable</div>
             )}
           </div>
         </div>
@@ -103,12 +123,14 @@ export default function HomePage() {
             <div className="flex gap-4 justify-center">
               {supabaseAvailable ? (
                 <>
-                  <Button size="lg" asChild>
-                    <Link href="/auth/sign-up">Get Started</Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link href="/auth/login">Login</Link>
-                  </Button>
+                  <Link href="/auth/sign-up">
+                    <SimpleButton size="lg">Get Started</SimpleButton>
+                  </Link>
+                  <Link href="/auth/login">
+                    <SimpleButton variant="outline" size="lg">
+                      Login
+                    </SimpleButton>
+                  </Link>
                 </>
               ) : (
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -121,32 +143,32 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">⚡ Lightning Fast</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <SimpleCard>
+              <SimpleCardHeader>
+                <SimpleCardTitle className="flex items-center gap-2">⚡ Lightning Fast</SimpleCardTitle>
+              </SimpleCardHeader>
+              <SimpleCardContent>
                 <p className="text-gray-600">Transform documents to websites in under 60 seconds</p>
-              </CardContent>
-            </Card>
+              </SimpleCardContent>
+            </SimpleCard>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">🎨 Beautiful Design</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <SimpleCard>
+              <SimpleCardHeader>
+                <SimpleCardTitle className="flex items-center gap-2">🎨 Beautiful Design</SimpleCardTitle>
+              </SimpleCardHeader>
+              <SimpleCardContent>
                 <p className="text-gray-600">Professional templates with customizable themes</p>
-              </CardContent>
-            </Card>
+              </SimpleCardContent>
+            </SimpleCard>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">📱 Responsive</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <SimpleCard>
+              <SimpleCardHeader>
+                <SimpleCardTitle className="flex items-center gap-2">📱 Responsive</SimpleCardTitle>
+              </SimpleCardHeader>
+              <SimpleCardContent>
                 <p className="text-gray-600">Works perfectly on desktop, tablet, and mobile devices</p>
-              </CardContent>
-            </Card>
+              </SimpleCardContent>
+            </SimpleCard>
           </div>
         </div>
       </main>

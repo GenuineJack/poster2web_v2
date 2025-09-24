@@ -2,8 +2,6 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
-import { ErrorBoundary } from "@/components/error-boundary"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,12 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased">
-        <ErrorBoundary>
-          {children}
-          <Toaster />
-        </ErrorBoundary>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }
