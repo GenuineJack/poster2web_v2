@@ -51,8 +51,8 @@ importers:
         specifier: latest
         version: 1.2.8(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@supabase/ssr':
-        specifier: ^0.7.2
-        version: 0.7.2(@supabase/supabase-js@2.57.4)
+        specifier: ^0.7.0
+        version: 0.7.0(@supabase/supabase-js@2.57.4)
       '@supabase/supabase-js':
         specifier: ^2.57.4
         version: 2.57.4
