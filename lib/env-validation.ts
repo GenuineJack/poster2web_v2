@@ -7,6 +7,10 @@ export function validateEnvironmentVariables() {
   const missingVars: string[] = []
   const invalidVars: string[] = []
 
+  console.log("[v0] Environment validation - checking variables...")
+  console.log("[v0] NEXT_PUBLIC_SUPABASE_URL exists:", !!process.env.NEXT_PUBLIC_SUPABASE_URL)
+  console.log("[v0] NEXT_PUBLIC_SUPABASE_ANON_KEY exists:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+
   for (const [key, value] of Object.entries(requiredEnvVars)) {
     if (!value) {
       missingVars.push(key)
@@ -23,9 +27,16 @@ export function validateEnvironmentVariables() {
       .filter(Boolean)
       .join("\n")
 
+    console.error("[v0] Environment validation failed:")
+    console.error("[v0] Missing vars:", missingVars)
+    console.error("[v0] Invalid vars:", invalidVars)
+    console.error("[v0] Current NODE_ENV:", process.env.NODE_ENV)
+    console.error("[v0] Current VERCEL_ENV:", process.env.VERCEL_ENV)
+
     throw new Error(`Environment validation failed:\n${errorMessage}`)
   }
 
+  console.log("[v0] Environment validation passed successfully")
   return true
 }
 
