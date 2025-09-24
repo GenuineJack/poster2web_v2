@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { hasValidSupabaseConfig } from "../lib/env-validation"
 
 // Simple inline button component
 function SimpleButton({
@@ -69,10 +69,7 @@ export default function HomePage() {
   const [supabaseAvailable, setSupabaseAvailable] = useState(false)
 
   useEffect(() => {
-    // Check if Supabase environment variables are available
-    const hasSupabaseConfig = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-
-    setSupabaseAvailable(hasSupabaseConfig)
+    setSupabaseAvailable(hasValidSupabaseConfig())
     setLoading(false)
   }, [])
 

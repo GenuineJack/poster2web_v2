@@ -1,20 +1,16 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
-import { getValidatedEnvVars } from "../env-validation"
+import { getValidatedEnvVars, hasValidSupabaseConfig } from "../env-validation"
 
-/**
- * Especially important if using Fluid compute: Don't put this client in a
- * global variable. Always create a new client within each function when using
- * it.
- */
 export async function createClient() {
+  // Check if we have valid config before proceeding
+  if (!hasValidSupabaseConfig()) {
+    console.warn("[v0] Supabase not configured for server client")
+    return null as any
+  }
+
   try {
     const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
-
-    if (!supabaseUrl || supabaseUrl === "https://placeholder.supabase.co") {
-      throw new Error("Supabase URL not configured properly for server client")
-    }
-
     const cookieStore = await cookies()
 
     const client = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -26,9 +22,7 @@ export async function createClient() {
           try {
             cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
           } catch {
-            // The "setAll" method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Ignore cookie setting errors in Server Components
           }
         },
       },
@@ -38,6 +32,6 @@ export async function createClient() {
     return client
   } catch (error) {
     console.error("[v0] Failed to create Supabase server client:", error)
-    throw error
+    return null as any
   }
 }

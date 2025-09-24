@@ -1,30 +1,45 @@
 "use client"
 
 import type React from "react"
-
 import { createClient } from "@/lib/supabase/client"
+import { hasValidSupabaseConfig } from "@/lib/env-validation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function Page() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [supabaseAvailable, setSupabaseAvailable] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    setSupabaseAvailable(hasValidSupabaseConfig())
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!supabaseAvailable) {
+      setError("Authentication is not configured. Please contact support.")
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
     try {
       const supabase = createClient()
+
+      if (!supabase) {
+        throw new Error("Authentication service unavailable")
+      }
 
       const redirectUrl =
         typeof window !== "undefined"
@@ -59,6 +74,33 @@ export default function Page() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (!supabaseAvailable) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10">
+        <div className="w-full max-w-sm">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Authentication Unavailable</CardTitle>
+              <CardDescription>Authentication is not configured for this application.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Please contact the administrator to set up authentication.
+                </p>
+                <Link href="/">
+                  <Button variant="outline" className="w-full bg-transparent">
+                    Return Home
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (

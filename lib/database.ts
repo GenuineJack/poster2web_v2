@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
+import { hasValidSupabaseConfig } from "@/lib/env-validation"
 import type { Section, Project, Settings } from "@/hooks/use-app-state"
 import { ErrorHandler } from "./error-handler"
 import { withRetry, retryConfigs } from "./retry-utils"
@@ -47,6 +48,15 @@ export const database = {
   // Projects
   async getProjects(): Promise<DatabaseProject[]> {
     return withRetry(async () => {
+      if (!hasValidSupabaseConfig()) {
+        throw ErrorHandler.createError(
+          "CLIENT_NOT_AVAILABLE",
+          "Supabase not configured",
+          "Database connection not available. Please check your configuration.",
+          "high",
+        )
+      }
+
       const supabase = createClient()
 
       if (!supabase) {
@@ -82,7 +92,15 @@ export const database = {
     const cachedFn = withCache(
       async (projectId: string) => {
         return withRetry(async () => {
+          if (!hasValidSupabaseConfig()) {
+            return null
+          }
+
           const supabase = createClient()
+          if (!supabase) {
+            return null
+          }
+
           try {
             const { data, error } = await supabase.from("projects").select("*").eq("id", projectId).single()
 
@@ -119,7 +137,25 @@ export const database = {
     file_type?: string
     theme_settings?: Settings
   }): Promise<DatabaseProject> {
+    if (!hasValidSupabaseConfig()) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase not configured",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
+
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
+
     try {
       const {
         data: { user },
@@ -175,6 +211,15 @@ export const database = {
     },
   ): Promise<DatabaseProject> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
+
     try {
       const { data, error } = await supabase.from("projects").update(updates).eq("id", id).select().single()
 
@@ -196,6 +241,15 @@ export const database = {
 
   async deleteProject(id: string): Promise<void> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
+
     try {
       const { error } = await supabase.from("projects").delete().eq("id", id)
 
@@ -219,7 +273,15 @@ export const database = {
     const cachedFn = withCache(
       async (id: string) => {
         return withRetry(async () => {
+          if (!hasValidSupabaseConfig()) {
+            return []
+          }
+
           const supabase = createClient()
+          if (!supabase) {
+            return []
+          }
+
           const { data, error } = await supabase
             .from("project_sections")
             .select("*")
@@ -250,6 +312,14 @@ export const database = {
     sort_order?: number
   }): Promise<DatabaseSection> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { data, error } = await supabase
@@ -292,6 +362,14 @@ export const database = {
     },
   ): Promise<DatabaseSection> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { data, error } = await supabase.from("project_sections").update(updates).eq("id", id).select().single()
@@ -314,6 +392,14 @@ export const database = {
 
   async deleteSection(id: string): Promise<void> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { error } = await supabase.from("project_sections").delete().eq("id", id)
@@ -336,6 +422,14 @@ export const database = {
   // Project Assets
   async getProjectAssets(projectId: string): Promise<DatabaseAsset[]> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { data, error } = await supabase
@@ -370,6 +464,14 @@ export const database = {
     metadata?: Record<string, any>
   }): Promise<DatabaseAsset> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { data, error } = await supabase.from("project_assets").insert(asset).select().single()
@@ -392,6 +494,14 @@ export const database = {
 
   async deleteAsset(id: string): Promise<void> {
     const supabase = createClient()
+    if (!supabase) {
+      throw ErrorHandler.createError(
+        "CLIENT_NOT_AVAILABLE",
+        "Supabase client not available",
+        "Database connection not available. Please check your configuration.",
+        "high",
+      )
+    }
 
     try {
       const { error } = await supabase.from("project_assets").delete().eq("id", id)

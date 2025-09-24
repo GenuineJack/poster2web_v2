@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { hasValidSupabaseConfig } from "@/lib/env-validation"
 import { Button } from "@/components/ui/button"
 import { ProjectList } from "@/components/project-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,8 +10,48 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 
 export default async function DashboardPage() {
+  // Check if Supabase is configured
+  if (!hasValidSupabaseConfig()) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link href="/" className="text-xl font-bold">
+              Poster2Web
+            </Link>
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8">
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle>Authentication Required</CardTitle>
+              <CardDescription>This feature requires authentication to be configured.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Please contact the administrator to set up authentication.
+                </p>
+                <Link href="/">
+                  <Button variant="outline" className="w-full bg-transparent">
+                    Return Home
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    )
+  }
+
   try {
     const supabase = await createClient()
+
+    if (!supabase) {
+      redirect("/auth/login")
+    }
+
     const { data, error } = await supabase.auth.getUser()
 
     if (error || !data?.user) {
