@@ -121,25 +121,20 @@ export default function HomePage() {
               <strong>No coding required.</strong>
             </p>
             <div className="flex gap-4 justify-center">
-              {supabaseAvailable ? (
-                <>
-                  <Link href="/auth/sign-up">
-                    <SimpleButton size="lg">Get Started</SimpleButton>
-                  </Link>
-                  <Link href="/auth/login">
-                    <SimpleButton variant="outline" size="lg">
-                      Login
-                    </SimpleButton>
-                  </Link>
-                </>
-              ) : (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-yellow-800 text-sm">
-                    Authentication is currently unavailable. Please check your configuration.
-                  </p>
-                </div>
+              <Link href="/upload">
+                <SimpleButton size="lg">Get Started</SimpleButton>
+              </Link>
+              {supabaseAvailable && (
+                <Link href="/auth/login">
+                  <SimpleButton variant="outline" size="lg">
+                    Login
+                  </SimpleButton>
+                </Link>
               )}
             </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Try it free - no account required! Create an account to save your work.
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">

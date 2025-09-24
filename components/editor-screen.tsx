@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Eye, Download, Moon, Sun, Save } from "lucide-react"
+import { ArrowLeft, Eye, Download, Moon, Sun, Save, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAppState } from "@/hooks/use-app-state"
@@ -11,20 +11,28 @@ import { DesignTab } from "@/components/editor/design-tab"
 import { SettingsTab } from "@/components/editor/settings-tab"
 import { WebsitePreview } from "@/components/website-preview"
 import { ExportDialog } from "@/components/export-dialog"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 
 export function EditorScreen() {
   const { state, actions } = useAppState()
   const [showPreview, setShowPreview] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+
+  const isGuestMode = pathname.includes("/guest")
 
   // Get project ID from window (set by EditorWrapper)
   const projectId = (window as any).__currentProjectId
   const { saveProject } = useProjectSync(projectId)
 
   const handleBack = () => {
-    router.push("/dashboard")
+    if (isGuestMode) {
+      router.push("/upload")
+    } else {
+      router.push("/dashboard")
+    }
   }
 
   const toggleDarkMode = () => {
@@ -32,7 +40,9 @@ export function EditorScreen() {
   }
 
   const handleSave = async () => {
-    await saveProject()
+    if (!isGuestMode) {
+      await saveProject()
+    }
   }
 
   return (
@@ -44,21 +54,34 @@ export function EditorScreen() {
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={handleBack} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
+                {isGuestMode ? "Back to Upload" : "Back to Dashboard"}
               </Button>
               <div>
                 <h1 className="text-xl font-bold">Poster2Web Editor</h1>
-                <p className="text-sm text-muted-foreground">{state.currentProject.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {state.currentProject.title}
+                  {isGuestMode && " (Guest Mode)"}
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {state.unsavedChanges && (
+              {!isGuestMode && state.unsavedChanges && (
                 <Button variant="outline" onClick={handleSave} className="gap-2 bg-transparent">
                   <Save className="h-4 w-4" />
                   Save
                 </Button>
               )}
+
+              {isGuestMode && (
+                <Link href="/auth/sign-up">
+                  <Button variant="outline" className="gap-2 bg-transparent">
+                    <User className="h-4 w-4" />
+                    Save Work
+                  </Button>
+                </Link>
+              )}
+
               <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
                 <Eye className="h-4 w-4" />
                 Preview
@@ -116,8 +139,12 @@ export function EditorScreen() {
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
               <div className="text-sm text-muted-foreground ml-4">https://your-website.com</div>
-              {state.unsavedChanges && (
-                <div className="ml-auto text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Unsaved changes</div>
+              {isGuestMode ? (
+                <div className="ml-auto text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">Guest Mode</div>
+              ) : (
+                state.unsavedChanges && (
+                  <div className="ml-auto text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Unsaved changes</div>
+                )
               )}
             </div>
             <div className="h-[calc(100%-60px)]">
