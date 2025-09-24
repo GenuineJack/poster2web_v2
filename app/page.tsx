@@ -1,9 +1,6 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { hasValidSupabaseConfig } from "../lib/env-validation"
 
 // Simple inline button component
 function SimpleButton({
@@ -65,43 +62,14 @@ function SimpleCardContent({ children, className = "" }: { children: React.React
 }
 
 export default function HomePage() {
-  const [loading, setLoading] = useState(true)
-  const [supabaseAvailable, setSupabaseAvailable] = useState(false)
-
-  useEffect(() => {
-    setSupabaseAvailable(hasValidSupabaseConfig())
-    setLoading(false)
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <h1 className="text-xl font-bold">Poster2Web</h1>
           <div className="flex gap-2">
-            {supabaseAvailable ? (
-              <>
-                <Link href="/auth/login">
-                  <SimpleButton variant="ghost">Login</SimpleButton>
-                </Link>
-                <Link href="/auth/sign-up">
-                  <SimpleButton>Sign Up</SimpleButton>
-                </Link>
-              </>
-            ) : (
-              <div className="text-sm text-gray-500">Authentication unavailable</div>
-            )}
+            <SimpleButton variant="ghost">Login</SimpleButton>
+            <SimpleButton>Sign Up</SimpleButton>
           </div>
         </div>
       </header>
@@ -118,16 +86,10 @@ export default function HomePage() {
               <strong>No coding required.</strong>
             </p>
             <div className="flex gap-4 justify-center">
-              <Link href="/upload">
-                <SimpleButton size="lg">Get Started</SimpleButton>
-              </Link>
-              {supabaseAvailable && (
-                <Link href="/auth/login">
-                  <SimpleButton variant="outline" size="lg">
-                    Login
-                  </SimpleButton>
-                </Link>
-              )}
+              <SimpleButton size="lg">Get Started</SimpleButton>
+              <SimpleButton variant="outline" size="lg">
+                Login
+              </SimpleButton>
             </div>
             <p className="text-sm text-gray-500 mt-4">
               Try it free - no account required! Create an account to save your work.
