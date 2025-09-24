@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowLeft, Eye, Download, Moon, Sun, Save, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -18,13 +18,21 @@ export function EditorScreen() {
   const { state, actions } = useAppState()
   const [showPreview, setShowPreview] = useState(false)
   const [showExport, setShowExport] = useState(false)
+  const [projectId, setProjectId] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
   const isGuestMode = pathname.includes("/guest")
 
-  // Get project ID from window (set by EditorWrapper)
-  const projectId = (window as any).__currentProjectId
+  useEffect(() => {
+    setIsClient(true)
+    // Get project ID from window (set by EditorWrapper) only on client side
+    if (typeof window !== "undefined") {
+      setProjectId((window as any).__currentProjectId || null)
+    }
+  }, [])
+
   const { saveProject } = useProjectSync(projectId)
 
   const handleBack = () => {
@@ -40,9 +48,20 @@ export function EditorScreen() {
   }
 
   const handleSave = async () => {
-    if (!isGuestMode) {
+    if (!isGuestMode && projectId) {
       await saveProject()
     }
+  }
+
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading editor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

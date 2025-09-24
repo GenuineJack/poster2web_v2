@@ -254,6 +254,7 @@ export const useAppState = create<AppState & { actions: AppActions }>()(
           state.ui = initialUI
         }
       },
+      skipHydration: typeof window === "undefined",
     },
   ),
 )
