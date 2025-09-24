@@ -17,8 +17,6 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    serverExternalPackages: ['@supabase/supabase-js'],
-    nodeMiddleware: true,
   },
   serverExternalPackages: ['@supabase/supabase-js'],
   compress: true,
