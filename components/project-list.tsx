@@ -81,12 +81,8 @@ export const ProjectList = memo(function ProjectList() {
   }
 
   const handleCreateProject = async () => {
-    console.log("[v0] Create project button clicked")
-
     try {
-      console.log("[v0] Checking Supabase configuration...")
       if (!hasValidSupabaseConfig()) {
-        console.error("[v0] Supabase configuration invalid")
         toast({
           title: "Configuration Error",
           description: "Database connection not available. Please check your configuration.",
@@ -95,10 +91,8 @@ export const ProjectList = memo(function ProjectList() {
         return
       }
 
-      console.log("[v0] Creating Supabase client...")
       const supabase = createClient()
       if (!supabase) {
-        console.error("[v0] Failed to create Supabase client")
         toast({
           title: "Connection Error",
           description: "Unable to connect to database. Please try again.",
@@ -107,13 +101,12 @@ export const ProjectList = memo(function ProjectList() {
         return
       }
 
-      console.log("[v0] Checking user authentication...")
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser()
+
       if (authError || !user) {
-        console.error("[v0] User not authenticated:", authError)
         toast({
           title: "Authentication Required",
           description: "Please log in to create a project.",
@@ -122,16 +115,14 @@ export const ProjectList = memo(function ProjectList() {
         return
       }
 
-      console.log("[v0] Creating project for user:", user.id)
       const project = await database.createProject({
         title: "New Project",
         description: "A new website project",
       })
 
-      console.log("[v0] Project created successfully:", project.id)
       router.push(`/editor/${project.id}`)
     } catch (error: any) {
-      console.error("[v0] Error creating project:", error)
+      console.error("Error creating project:", error)
 
       const appError = error.code ? error : ErrorHandler.handleDatabaseError(error)
 
