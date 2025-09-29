@@ -4,6 +4,8 @@ import type { Metadata, Viewport } from "next"
 import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
+import { Geist, Geist_Mono } from "next/font/google"
+
 import { Geist, Geist_Mono, Geist as V0_Font_Geist, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
 
 // Initialize fonts
