@@ -120,7 +120,7 @@ const toggleArrayItem = <T>(array: T[], item: T): T[] => {\
   }
 }
 \
-export const useAppState = create<AppState & { actions: AppActions }>()( 
+export const useAppState = create<AppState & { actions: AppActions }>()(
   persist(
     (set, get) => ({\
       currentProject: initialProject,
