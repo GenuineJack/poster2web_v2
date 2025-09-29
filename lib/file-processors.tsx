@@ -41,7 +41,6 @@ export async function processFile(file: File): Promise<Section[]> {
     const appError = ErrorHandler.handleFileProcessingError(error, file.name)
     ErrorHandler.logError(appError)
     console.error("File processing error:", error)
-    // Fallback to basic sections
     return createBasicSections(file.name)
   }
 }

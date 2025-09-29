@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic"
 
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { ProjectList } from "@/components/project-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { Plus } from "lucide-react"
 
 export default async function DashboardPage() {
   // Check if Supabase is configured
@@ -71,12 +71,6 @@ export default async function DashboardPage() {
               <span className="text-sm text-muted-foreground">Dashboard</span>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/upload">
-                <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                  <Plus className="h-4 w-4" />
-                  New Project
-                </Button>
-              </Link>
               <span className="text-sm text-muted-foreground">Welcome, {data.user.email}</span>
               <form action="/auth/signout" method="post">
                 <Button variant="outline" type="submit" size="sm">

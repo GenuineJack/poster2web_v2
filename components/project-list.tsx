@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, memo } from "react"
 import { Plus, FileText, Calendar, MoreHorizontal, Trash2, Edit, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -225,8 +227,17 @@ export const ProjectList = memo(function ProjectList() {
       }
     }
 
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Don't trigger if clicking on dropdown or its children
+      const target = e.target as HTMLElement
+      if (target.closest("[data-dropdown-trigger]") || target.closest("[data-dropdown-content]")) {
+        return
+      }
+      onEdit(project.id)
+    }
+
     return (
-      <Card className="hover:shadow-md transition-shadow cursor-pointer group">
+      <Card className="hover:shadow-md transition-shadow cursor-pointer group" onClick={handleCardClick}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
@@ -243,22 +254,41 @@ export const ProjectList = memo(function ProjectList() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  data-dropdown-trigger
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(project.id)}>
+              <DropdownMenuContent align="end" data-dropdown-content>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit(project.id)
+                  }}
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDuplicate(project)}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDuplicate(project)
+                  }}
+                >
                   <Copy className="h-4 w-4 mr-2" />
                   Duplicate
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => onDelete(project.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(project.id)
+                  }}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -268,7 +298,7 @@ export const ProjectList = memo(function ProjectList() {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent onClick={() => onEdit(project.id)}>
+        <CardContent>
           <div className="space-y-2">
             {project.description && <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">

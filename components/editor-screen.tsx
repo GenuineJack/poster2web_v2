@@ -78,7 +78,7 @@ export function EditorScreen() {
               <div>
                 <h1 className="text-xl font-bold">Poster2Web Editor</h1>
                 <p className="text-sm text-muted-foreground">
-                  {currentProject.title}
+                  {currentProject?.title || "Untitled Project"}
                   {isGuestMode && " (Guest Mode)"}
                 </p>
               </div>

@@ -9,6 +9,7 @@ import { processFile } from "@/lib/file-processors"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, User } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -20,9 +21,26 @@ export default function UploadPage() {
       try {
         actions.setLoading(true, "Processing your file...", "This may take a moment")
 
+        if (!file) {
+          throw new Error("No file selected")
+        }
+
+        if (file.size > 50 * 1024 * 1024) {
+          // 50MB limit
+          throw new Error("File size exceeds 50MB limit")
+        }
+
         const result = await processFile(file)
-        actions.loadProject(result.project)
-        actions.updateSettings(result.settings)
+
+        if (!result || result.length === 0) {
+          throw new Error("Failed to process file - no content extracted")
+        }
+
+        actions.loadProject({
+          title: file.name.replace(/\.[^/.]+$/, "") || "My Website",
+          sections: result,
+        })
+
         actions.setLoading(false)
 
         // Navigate to editor
@@ -30,6 +48,14 @@ export default function UploadPage() {
       } catch (error) {
         console.error("File processing error:", error)
         actions.setLoading(false)
+
+        const errorMessage = error instanceof Error ? error.message : "Failed to process file"
+
+        toast({
+          title: "Upload Error",
+          description: errorMessage,
+          variant: "destructive",
+        })
       }
     },
     [actions, router],

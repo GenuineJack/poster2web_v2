@@ -2,11 +2,24 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAppState } from "@/hooks/use-app-state"
+
+export default function GuestEditorContent() {
+  const router = useRouter()
+  const { currentProject, actions } = useAppState()
+  const [showSavePrompt, setShowSavePrompt] = useState(false)
+
+  useEffect(() => {
+   ```tsx file="components/guest-editor-content.tsx"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { EditorScreen } from "@/components/editor-screen"
 import { useAppState } from "@/hooks/use-app-state"
 import { Button } from "@/components/ui/button"
-import { Save, User } from "lucide-react"
+import { Save, User } from 'lucide-react'
 
 export default function GuestEditorContent() {
   const router = useRouter()
@@ -26,8 +39,15 @@ export default function GuestEditorContent() {
 
   // Redirect if no project loaded
   useEffect(() => {
-    if (!currentProject.sections.length && currentProject.title === "My Website") {
-      router.push("/upload")
+    if (!currentProject || !currentProject.sections || currentProject.sections.length === 0) {
+      // Only redirect if we're sure there's no content
+      const hasContent = currentProject?.sections?.some(section => 
+        section.content && section.content.length > 0
+      )
+      
+      if (!hasContent) {
+        router.push("/upload")
+      }
     }
   }, [currentProject, router])
 
