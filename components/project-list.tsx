@@ -46,7 +46,7 @@ export const ProjectList = memo(function ProjectList() {
 
   useEffect(() => {
     debouncedSearch(searchTerm)
-  }, [searchTerm, projects, debouncedSearch])
+  }, [searchTerm, projects]) // Removed debouncedSearch from dependencies
 
   useEffect(() => {
     loadProjects()
