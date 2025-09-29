@@ -29,11 +29,30 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("[v0] Error caught by boundary:", error, errorInfo)
+    console.error("[ErrorBoundary] Error caught:", error, errorInfo)
+
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "unknown",
+      url: typeof window !== "undefined" ? window.location.href : "unknown",
+    }
+
+    console.error("[ErrorBoundary] Full error context:", errorDetails)
 
     // Log to external service in production
     if (process.env.NODE_ENV === "production") {
-      // TODO: Send to error tracking service
+      try {
+        // Could integrate with error reporting service like Sentry here
+        // Example: Sentry.captureException(error, { extra: errorDetails })
+
+        // For now, send to console with structured format for monitoring
+        console.error("PRODUCTION_ERROR", JSON.stringify(errorDetails))
+      } catch (reportingError) {
+        console.error("Failed to report error:", reportingError)
+      }
     }
 
     this.setState({
@@ -74,9 +93,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   )}
                 </details>
               )}
-              <Button onClick={this.handleRetry} className="gap-2">
-                🔄 Try Again
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button onClick={this.handleRetry} className="gap-2">
+                  🔄 Try Again
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()} className="gap-2 bg-transparent">
+                  🔄 Reload Page
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -43,10 +44,6 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-}
-
-function ErrorBoundary({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-screen">{children}</div>
 }
 
 export default function RootLayout({

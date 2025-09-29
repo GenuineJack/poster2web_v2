@@ -1,15 +1,35 @@
 "use client"
 
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useRef } from "react"
 import { useAppState } from "@/hooks/use-app-state"
 import { database, appProjectToDatabaseProject } from "@/lib/database"
 import { toast } from "@/hooks/use-toast"
 
-export function useProjectSync(projectId: string) {
+function useDebounce<T extends (...args: any[]) => any>(callback: T, delay: number): T {
+  const timeoutRef = useRef<NodeJS.Timeout>()
+
+  return useCallback(
+    (...args: Parameters<T>) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        callback(...args)
+      }, delay)
+    },
+    [callback, delay],
+  ) as T
+}
+
+export function useProjectSync(projectId: string | null) {
   const { currentProject, settings, unsavedChanges, actions } = useAppState()
+  const saveInProgressRef = useRef(false)
 
   const saveProject = useCallback(async () => {
-    if (!unsavedChanges) return
+    if (!projectId || !unsavedChanges || saveInProgressRef.current) return
+
+    saveInProgressRef.current = true
 
     try {
       const { project: dbProject, sections: dbSections } = appProjectToDatabaseProject(currentProject, settings)
@@ -72,24 +92,36 @@ export function useProjectSync(projectId: string) {
         description: "Failed to save project",
         variant: "destructive",
       })
+    } finally {
+      saveInProgressRef.current = false
     }
   }, [currentProject, settings, unsavedChanges, projectId, actions])
 
-  // Auto-save every 30 seconds if there are unsaved changes
+  const debouncedSave = useDebounce(saveProject, 2000)
+
+  // Auto-save with debouncing when changes occur
   useEffect(() => {
-    if (!unsavedChanges) return
+    if (!unsavedChanges || !projectId) return
+
+    debouncedSave()
+  }, [unsavedChanges, projectId, debouncedSave])
+
+  useEffect(() => {
+    if (!unsavedChanges || !projectId) return
 
     const interval = setInterval(() => {
-      saveProject()
-    }, 30000)
+      if (!saveInProgressRef.current) {
+        saveProject()
+      }
+    }, 60000) // Increased to 60 seconds since we have debounced saves
 
     return () => clearInterval(interval)
-  }, [unsavedChanges, saveProject])
+  }, [unsavedChanges, saveProject, projectId])
 
   // Save on page unload
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (unsavedChanges) {
+      if (unsavedChanges && !saveInProgressRef.current) {
         e.preventDefault()
         e.returnValue = ""
         saveProject()

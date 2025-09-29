@@ -91,17 +91,42 @@ export function withCache<T extends any[], R>(
     // Try to get from cache first
     const cached = cache.get<R>(key)
     if (cached !== null) {
-      console.log(`[v0] Cache hit for key: ${key}`)
+      console.log(`[Cache] Hit for key: ${key}`)
       return cached
     }
 
     // Execute function and cache result
-    console.log(`[v0] Cache miss for key: ${key}`)
-    const result = await fn(...args)
-    cache.set(key, result, ttlMs)
-
-    return result
+    console.log(`[Cache] Miss for key: ${key}`)
+    try {
+      const result = await fn(...args)
+      cache.set(key, result, ttlMs)
+      return result
+    } catch (error) {
+      console.error(`[Cache] Error for key ${key}:`, error)
+      throw error
+    }
   }
+}
+
+export function invalidateCache(pattern?: string): void {
+  if (!pattern) {
+    cache.clear()
+    console.log("[Cache] Cleared all cache entries")
+    return
+  }
+
+  const regex = new RegExp(pattern)
+  const keysToDelete: string[] = []
+
+  // We need to access the private cache map, so we'll add a method to the class
+  for (const [key] of (cache as any).cache.entries()) {
+    if (regex.test(key)) {
+      keysToDelete.push(key)
+    }
+  }
+
+  keysToDelete.forEach((key) => cache.delete(key))
+  console.log(`[Cache] Invalidated ${keysToDelete.length} entries matching pattern: ${pattern}`)
 }
 
 // Specific cache configurations
@@ -110,4 +135,13 @@ export const cacheConfigs = {
   projectSections: 5 * 60 * 1000, // 5 minutes
   userProfile: 10 * 60 * 1000, // 10 minutes
   fileValidation: 30 * 60 * 1000, // 30 minutes
+}
+
+export async function warmCache() {
+  console.log("[Cache] Starting cache warming...")
+
+  // This would be called on app startup to pre-populate critical cache entries
+  // Implementation depends on specific use cases
+
+  console.log("[Cache] Cache warming completed")
 }

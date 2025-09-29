@@ -18,7 +18,7 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
-  const { state } = useAppState()
+  const { currentProject, settings } = useAppState()
   const [activeTab, setActiveTab] = useState("html")
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({})
 
@@ -46,9 +46,9 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
     URL.revokeObjectURL(url)
   }
 
-  const htmlContent = exportToHTML(state.currentProject, state.settings)
-  const reactContent = exportToReact(state.currentProject, state.settings)
-  const nextjsContent = exportToNextJS(state.currentProject, state.settings)
+  const htmlContent = exportToHTML(currentProject, settings)
+  const reactContent = exportToReact(currentProject, settings)
+  const nextjsContent = exportToNextJS(currentProject, settings)
 
   const exports = [
     {
@@ -57,7 +57,7 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
       description: "Complete HTML file with embedded CSS",
       icon: <FileText className="h-5 w-5" />,
       content: htmlContent,
-      filename: `${state.currentProject.title.toLowerCase().replace(/\s+/g, "-")}.html`,
+      filename: `${currentProject.title.toLowerCase().replace(/\s+/g, "-")}.html`,
       language: "html",
     },
     {
@@ -66,7 +66,7 @@ export function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
       description: "React component with inline styles",
       icon: <Code className="h-5 w-5" />,
       content: reactContent,
-      filename: `${state.currentProject.title.replace(/\s+/g, "")}.jsx`,
+      filename: `${currentProject.title.replace(/\s+/g, "")}.jsx`,
       language: "javascript",
     },
     {

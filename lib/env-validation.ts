@@ -2,7 +2,7 @@ export function validateEnvironmentVariables() {
   // During build time, environment variables might not be available
   // This is normal and expected behavior
   if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
-    console.log("[v0] Build-time environment - skipping strict validation")
+    console.log("Build-time environment - skipping strict validation")
     return false
   }
 
@@ -25,11 +25,11 @@ export function validateEnvironmentVariables() {
     }
 
     if (missingVars.length > 0 || invalidVars.length > 0) {
-      console.warn("[v0] Environment validation issues:", { missingVars, invalidVars })
+      console.warn("Environment validation issues:", { missingVars, invalidVars })
       return false
     }
 
-    console.log("[v0] Environment validation passed")
+    console.log("Environment validation passed")
     return true
   }
 
@@ -47,5 +47,60 @@ export function getValidatedEnvVars() {
 
 export function hasValidSupabaseConfig(): boolean {
   const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
-  return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith("https://"))
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return false
+  }
+
+  if (!supabaseUrl.startsWith("https://")) {
+    return false
+  }
+
+  // Basic format validation for Supabase URL
+  if (!supabaseUrl.includes(".supabase.co")) {
+    return false
+  }
+
+  return true
+}
+
+export function validateDeploymentEnvironment(): {
+  isValid: boolean
+  issues: string[]
+  warnings: string[]
+} {
+  const issues: string[] = []
+  const warnings: string[] = []
+
+  // Check critical environment variables
+  const criticalVars = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]
+
+  for (const varName of criticalVars) {
+    const value = process.env[varName]
+    if (!value) {
+      issues.push(`Missing critical environment variable: ${varName}`)
+    } else if (varName === "NEXT_PUBLIC_SUPABASE_URL" && !value.startsWith("https://")) {
+      issues.push(`${varName} must start with https://`)
+    }
+  }
+
+  // Check optional but recommended variables
+  const optionalVars = ["NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL"]
+
+  for (const varName of optionalVars) {
+    if (!process.env[varName]) {
+      warnings.push(`Optional environment variable not set: ${varName}`)
+    }
+  }
+
+  // Check runtime environment
+  if (!process.env.NODE_ENV) {
+    warnings.push("NODE_ENV not set")
+  }
+
+  return {
+    isValid: issues.length === 0,
+    issues,
+    warnings,
+  }
 }

@@ -1,8 +1,5 @@
 "use client"
 
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
-
 export interface Section {
   id: string
   icon: string
@@ -49,8 +46,8 @@ export interface UIState {
   loadingTitle: string
   loadingMessage: string
   activeTab: "content" | "design" | "settings"
-  expandedSections: Set<string>
-  selectedElements: Set<string>
+  expandedSections: string[]
+  selectedElements: string[]
 }
 
 export interface AppState {
@@ -110,46 +107,55 @@ const initialUI: UIState = {
   loadingTitle: "",
   loadingMessage: "",
   activeTab: "content",
-  expandedSections: new Set(),
-  selectedElements: new Set(),
+  expandedSections: [],
+  selectedElements: [],
 }
 
-export const useAppState = create<AppState & { actions: AppActions }>()(
+const toggleArrayItem = <T>(array: T[], item: T): T[] => {\
+  const index = array.indexOf(item)
+  if (index === -1) {\
+    return [...array, item]
+  } else {\
+    return array.filter((_, i) => i !== index)
+  }
+}
+\
+export const useAppState = create<AppState & { actions: AppActions }>()( 
   persist(
-    (set, get) => ({
+    (set, get) => ({\
       currentProject: initialProject,
       settings: initialSettings,
       ui: initialUI,
       unsavedChanges: false,
       lastSaved: null,
 
-      actions: {
+      actions: {\
         loadProject: (project) =>
-          set({
+          set({\
             currentProject: project,
             unsavedChanges: false,
             lastSaved: Date.now(),
           }),
 
         updateProject: (updates) =>
-          set((state) => ({
+          set((state) => ({\
             currentProject: { ...state.currentProject, ...updates },
             unsavedChanges: true,
           })),
 
         resetProject: () =>
-          set({
+          set({\
             currentProject: initialProject,
             unsavedChanges: false,
           }),
 
         updateSettings: (updates) =>
-          set((state) => ({
+          set((state) => ({\
             settings: { ...state.settings, ...updates },
             unsavedChanges: true,
           })),
 
-        updateColorScheme: (scheme) => {
+        updateColorScheme: (scheme) => {\
           const colors = getColorScheme(scheme)
           if (colors) {
             set((state) => ({
@@ -164,52 +170,47 @@ export const useAppState = create<AppState & { actions: AppActions }>()(
         },
 
         setScreen: (screen) =>
-          set((state) => ({
+          set((state) => ({\
             ui: { ...state.ui, currentScreen: screen },
           })),
 
         setLoading: (isLoading, title = "", message = "") =>
-          set((state) => ({
+          set((state) => ({\
             ui: {
               ...state.ui,
-              isLoading,
+              isLoading,\
               loadingTitle: title,
               loadingMessage: message,
             },
           })),
 
         setActiveTab: (tab) =>
-          set((state) => ({
+          set((state) => ({\
             ui: { ...state.ui, activeTab: tab },
           })),
 
         toggleSectionExpanded: (sectionId) =>
-          set((state) => {
-            const expanded = new Set(state.ui.expandedSections)
-            if (expanded.has(sectionId)) {
-              expanded.delete(sectionId)
-            } else {
-              expanded.add(sectionId)
-            }
-            return {
-              ui: { ...state.ui, expandedSections: expanded },
-            }
-          }),
+          set((state) => ({\
+            ui: { 
+              ...state.ui, \
+              expandedSections: toggleArrayItem(state.ui.expandedSections, sectionId)
+            },
+          })),
 
         addSection: (section) =>
-          set((state) => ({
+          set((state) => ({\
             currentProject: {
-              ...state.currentProject,
+              ...state.currentProject,\
               sections: [...state.currentProject.sections, section],
             },
             unsavedChanges: true,
           })),
 
         updateSection: (index, updates) =>
-          set((state) => {
-            const sections = [...state.currentProject.sections]
+          set((state) => {\
+            const sections = [...state.currentProject.sections]\
             sections[index] = { ...sections[index], ...updates }
-            return {
+            return {\
               currentProject: {
                 ...state.currentProject,
                 sections,
@@ -219,20 +220,20 @@ export const useAppState = create<AppState & { actions: AppActions }>()(
           }),
 
         deleteSection: (index) =>
-          set((state) => ({
+          set((state) => ({\
             currentProject: {
-              ...state.currentProject,
+              ...state.currentProject,\
               sections: state.currentProject.sections.filter((_, i) => i !== index),
             },
             unsavedChanges: true,
           })),
 
         moveSection: (fromIndex, toIndex) =>
-          set((state) => {
+          set((state) => {\
             const sections = [...state.currentProject.sections]
             const [moved] = sections.splice(fromIndex, 1)
             sections.splice(toIndex, 0, moved)
-            return {
+            return {\
               currentProject: {
                 ...state.currentProject,
                 sections,
@@ -242,16 +243,26 @@ export const useAppState = create<AppState & { actions: AppActions }>()(
           }),
       },
     }),
-    {
+    {\
       name: "poster2web-storage",
-      partialize: (state) => ({
+      partialize: (state) => ({\
         currentProject: state.currentProject,
         settings: state.settings,
         lastSaved: state.lastSaved,
+        ui: {\
+          activeTab: state.ui.activeTab,
+          expandedSections: state.ui.expandedSections,
+        },
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state) => {\
         if (state && !state.ui) {
           state.ui = initialUI
+        }
+        if (state?.ui) {
+          state.ui = {
+            ...initialUI,
+            ...state.ui,
+          }
         }
       },
       skipHydration: typeof window === "undefined",

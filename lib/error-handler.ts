@@ -48,6 +48,33 @@ export class ErrorHandler {
       )
     }
 
+    if (error?.code === "23505") {
+      return this.createError(
+        "DUPLICATE_ENTRY",
+        "Duplicate entry",
+        "This item already exists. Please try a different name.",
+        "medium",
+      )
+    }
+
+    if (error?.code === "23503") {
+      return this.createError(
+        "FOREIGN_KEY_VIOLATION",
+        "Reference error",
+        "Cannot delete this item because it is being used elsewhere.",
+        "medium",
+      )
+    }
+
+    if (error?.message?.includes("timeout")) {
+      return this.createError(
+        "DATABASE_TIMEOUT",
+        "Database timeout",
+        "The operation took too long. Please try again.",
+        "high",
+      )
+    }
+
     return this.createError(
       "DATABASE_ERROR",
       error?.message || "Database operation failed",
@@ -108,6 +135,24 @@ export class ErrorHandler {
       )
     }
 
+    if (error?.message?.includes("Email rate limit exceeded")) {
+      return this.createError(
+        "EMAIL_RATE_LIMIT",
+        "Too many email requests",
+        "Please wait a few minutes before requesting another email.",
+        "medium",
+      )
+    }
+
+    if (error?.message?.includes("Password should be at least")) {
+      return this.createError(
+        "WEAK_PASSWORD",
+        "Password too weak",
+        "Password must be at least 6 characters long.",
+        "medium",
+      )
+    }
+
     return this.createError(
       "AUTH_ERROR",
       error?.message || "Authentication failed",
@@ -118,6 +163,24 @@ export class ErrorHandler {
 
   static handleNetworkError(error: any): AppError {
     console.error("[ErrorHandler] Network error:", error)
+
+    if (error?.code === "NETWORK_ERROR" || error?.message?.includes("fetch")) {
+      return this.createError(
+        "NETWORK_ERROR",
+        "Network request failed",
+        "Network connection failed. Please check your internet connection and try again.",
+        "high",
+      )
+    }
+
+    if (error?.code === "TIMEOUT_ERROR") {
+      return this.createError(
+        "REQUEST_TIMEOUT",
+        "Request timeout",
+        "The request took too long. Please try again.",
+        "medium",
+      )
+    }
 
     return this.createError(
       "NETWORK_ERROR",
@@ -135,5 +198,10 @@ export class ErrorHandler {
       severity: error.severity,
       context: error.context,
     })
+
+    if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+      // Could integrate with error reporting service like Sentry here
+      // Example: Sentry.captureException(error)
+    }
   }
 }

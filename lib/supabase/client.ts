@@ -4,19 +4,19 @@ import { getValidatedEnvVars, hasValidSupabaseConfig } from "../env-validation"
 let clientInstance: ReturnType<typeof createBrowserClient> | null = null
 
 export function createClient() {
-  // Server-side: return null
+  // Server-side: return null to prevent SSR issues
   if (typeof window === "undefined") {
     return null as any
   }
 
-  // Return existing instance
+  // Return existing instance to prevent multiple clients
   if (clientInstance) {
     return clientInstance
   }
 
-  // Check if we have valid config
+  // Check if we have valid config before creating client
   if (!hasValidSupabaseConfig()) {
-    console.warn("[v0] Supabase not configured - returning mock client")
+    console.warn("Supabase not configured - client unavailable")
     return null as any
   }
 
@@ -24,15 +24,24 @@ export function createClient() {
     const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error("[v0] Missing Supabase configuration")
+      console.error("Missing Supabase configuration")
+      return null as any
+    }
+
+    if (!supabaseUrl.startsWith("https://")) {
+      console.error("Invalid Supabase URL format")
       return null as any
     }
 
     clientInstance = createBrowserClient(supabaseUrl, supabaseAnonKey)
-    console.log("[v0] Supabase client created successfully")
+    console.log("Supabase client created successfully")
     return clientInstance
   } catch (error) {
-    console.error("[v0] Failed to create Supabase client:", error)
+    console.error("Failed to create Supabase client:", error)
     return null as any
   }
+}
+
+export function resetClient() {
+  clientInstance = null
 }

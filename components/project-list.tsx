@@ -66,6 +66,11 @@ export const ProjectList = memo(function ProjectList() {
         throw new Error("Database connection not available. Please check your configuration.")
       }
 
+      const supabase = createClient()
+      if (!supabase) {
+        throw new Error("Unable to connect to database. Please refresh the page and try again.")
+      }
+
       const data = await database.getProjects()
       setProjects(data)
       setFilteredProjects(data)
@@ -106,21 +111,41 @@ export const ProjectList = memo(function ProjectList() {
       if (!supabase) {
         toast({
           title: "Connection Error",
-          description: "Unable to connect to database. Please try again.",
+          description: "Unable to connect to database. Please refresh the page and try again.",
           variant: "destructive",
         })
         return
       }
 
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser()
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser()
 
-      if (authError || !user) {
+        if (authError) {
+          console.error("Auth error:", authError)
+          toast({
+            title: "Authentication Error",
+            description: "Please log in again to create a project.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (!user) {
+          toast({
+            title: "Authentication Required",
+            description: "Please log in to create a project.",
+            variant: "destructive",
+          })
+          return
+        }
+      } catch (authError) {
+        console.error("Authentication check failed:", authError)
         toast({
-          title: "Authentication Required",
-          description: "Please log in to create a project.",
+          title: "Authentication Error",
+          description: "Unable to verify authentication. Please try logging in again.",
           variant: "destructive",
         })
         return
