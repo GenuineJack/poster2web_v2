@@ -22,6 +22,12 @@ export function createClient() {
 
   try {
     const { supabaseUrl, supabaseAnonKey } = getValidatedEnvVars()
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error("[v0] Missing Supabase configuration")
+      return null as any
+    }
+
     clientInstance = createBrowserClient(supabaseUrl, supabaseAnonKey)
     console.log("[v0] Supabase client created successfully")
     return clientInstance

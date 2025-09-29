@@ -12,29 +12,57 @@ export default function GuestEditorContent() {
   const router = useRouter()
   const { currentProject, actions } = useAppState()
   const [showSavePrompt, setShowSavePrompt] = useState(false)
+  const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
-    actions.setScreen("editor")
+    try {
+      actions.setScreen("editor")
 
-    // Show save prompt after 2 minutes of editing
-    const timer = setTimeout(() => {
-      setShowSavePrompt(true)
-    }, 120000)
+      // Show save prompt after 2 minutes of editing
+      const timer = setTimeout(() => {
+        setShowSavePrompt(true)
+      }, 120000)
 
-    return () => clearTimeout(timer)
+      return () => clearTimeout(timer)
+    } catch (error) {
+      console.error("[v0] Error in guest editor setup:", error)
+      setHasError(true)
+    }
   }, [actions])
 
   // Redirect if no project loaded
   useEffect(() => {
-    if (!currentProject || !currentProject.sections || currentProject.sections.length === 0) {
-      // Only redirect if we're sure there's no content
-      const hasContent = currentProject?.sections?.some((section) => section.content && section.content.length > 0)
+    try {
+      if (!currentProject || !currentProject.sections || currentProject.sections.length === 0) {
+        // Only redirect if we're sure there's no content
+        const hasContent = currentProject?.sections?.some((section) => section.content && section.content.length > 0)
 
-      if (!hasContent) {
-        router.push("/upload")
+        if (!hasContent) {
+          router.push("/upload")
+        }
       }
+    } catch (error) {
+      console.error("[v0] Error checking project content:", error)
+      setHasError(true)
     }
   }, [currentProject, router])
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-semibold text-red-600">Editor Error</h2>
+          <p className="text-gray-600">Something went wrong with the editor. Please try refreshing the page.</p>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+            <Button variant="outline" asChild>
+              <Link href="/upload">Start Over</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -32,6 +32,8 @@ export const ProjectList = memo(function ProjectList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredProjects, setFilteredProjects] = useState<DatabaseProject[]>([])
 
+  const [hasClientError, setHasClientError] = useState(false)
+
   const debouncedSearch = useDebouncedCallback((term: string) => {
     if (!term.trim()) {
       setFilteredProjects(projects)
@@ -58,11 +60,18 @@ export const ProjectList = memo(function ProjectList() {
     try {
       setLoading(true)
       setError(null)
+      setHasClientError(false)
+
+      if (!hasValidSupabaseConfig()) {
+        throw new Error("Database connection not available. Please check your configuration.")
+      }
+
       const data = await database.getProjects()
       setProjects(data)
       setFilteredProjects(data)
     } catch (error: any) {
       console.error("Error loading projects:", error)
+      setHasClientError(true)
 
       if (error.code) {
         // Already an AppError
@@ -310,6 +319,35 @@ export const ProjectList = memo(function ProjectList() {
       </Card>
     )
   })
+
+  if (hasClientError && !loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">My Projects</h2>
+            <p className="text-muted-foreground">Manage your website projects</p>
+          </div>
+        </div>
+
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FileText className="h-12 w-12 text-red-400 mb-4" />
+            <h3 className="text-lg font-semibold mb-2 text-red-800">Application Error</h3>
+            <p className="text-red-600 text-center mb-4">
+              A client-side error occurred while loading your projects. This might be due to a configuration issue.
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={loadProjects} variant="outline">
+                Try Again
+              </Button>
+              <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (loading) {
     return (

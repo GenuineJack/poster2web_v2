@@ -45,6 +45,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
 }
 
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  return <div className="min-h-screen">{children}</div>
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,7 +56,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </body>
     </html>
   )
 }
