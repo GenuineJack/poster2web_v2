@@ -1,4 +1,5 @@
 import type { Project, Settings } from "@/hooks/use-app-state"
+import { SecurityUtils } from "@/lib/security-utils"
 
 export function exportToReact(project: Project, settings: Settings): string {
   const componentName = toPascalCase(project.title)
@@ -126,7 +127,7 @@ function generateReactJSX(project: Project, settings: Settings): string {
       if (content.type === "text") {
         jsx += `        <div 
           style={styles.text}
-          dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(content.value || "")}\` }}
+           dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(SecurityUtils.sanitizeHTML(content.value || ""))}\` }}
         />\n`
       } else if (content.type === "image") {
         jsx += `        <figure style={styles.figure}>
@@ -139,7 +140,7 @@ function generateReactJSX(project: Project, settings: Settings): string {
         </figure>\n`
       } else if (content.type === "html") {
         jsx += `        <div 
-          dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(content.value || "")}\` }}
+           dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(SecurityUtils.sanitizeHTML(content.value || ""))}\` }}
         />\n`
       }
     })

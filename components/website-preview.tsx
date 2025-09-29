@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useAppState } from "@/hooks/use-app-state"
+import { SecurityUtils } from "@/lib/security-utils"
 import { cn } from "@/lib/utils"
 
 export function WebsitePreview() {
@@ -65,16 +66,17 @@ export function WebsitePreview() {
             <div className="space-y-6">
               {section.content.map((content, contentIndex) => (
                 <div key={contentIndex}>
-                  {content.type === "text" && (
-                    <div
-                      className="prose prose-lg max-w-none"
-                      style={{
-                        fontSize: section.isHeader ? "var(--title-size)" : "var(--content-size)",
-                        color: "var(--primary-color)",
-                      }}
-                      dangerouslySetInnerHTML={{ __html: content.value || "" }}
-                    />
-                  )}
+                   {content.type === "text" && (
+                     <div
+                       className="prose prose-lg max-w-none"
+                       style={{
+                         fontSize: section.isHeader ? "var(--title-size)" : "var(--content-size)",
+                         color: "var(--primary-color)",
+                       }}
+                       // Sanitize user-provided HTML to prevent XSS.
+                       dangerouslySetInnerHTML={{ __html: SecurityUtils.sanitizeHTML(content.value || "") }}
+                     />
+                   )}
 
                   {content.type === "image" && (
                     <figure className="text-center">
@@ -89,12 +91,13 @@ export function WebsitePreview() {
                     </figure>
                   )}
 
-                  {content.type === "html" && (
-                    <div
-                      className="prose prose-lg max-w-none"
-                      dangerouslySetInnerHTML={{ __html: content.value || "" }}
-                    />
-                  )}
+                   {content.type === "html" && (
+                     <div
+                       className="prose prose-lg max-w-none"
+                       // Sanitize user-provided raw HTML as a safeguard.
+                       dangerouslySetInnerHTML={{ __html: SecurityUtils.sanitizeHTML(content.value || "") }}
+                     />
+                   )}
                 </div>
               ))}
             </div>

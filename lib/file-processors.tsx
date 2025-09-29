@@ -729,7 +729,10 @@ function convertMarkdownToHtml(markdown: string): string {
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/_(.+?)_/g, "<em>$1</em>")
     // Links
-    .replace(/\[([^\]]+)\]$$([^)]+)$$/g, '<a href="$2" target="_blank">$1</a>')
+    // Convert Markdown links [text](url) into anchor tags.
+    // The previous implementation attempted to use "$$" delimiters, which never matched.
+    // Use the correct pattern with escaped parentheses.
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
     // Line breaks
     .replace(/\n\n/g, "</p><p>")
     // Lists

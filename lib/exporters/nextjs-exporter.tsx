@@ -1,4 +1,5 @@
 import type { Project, Settings } from "@/hooks/use-app-state"
+import { SecurityUtils } from "@/lib/security-utils"
 import { generateSEOMetadata } from "@/lib/content-analyzer"
 
 export function exportToNextJS(project: Project, settings: Settings): { page: string; metadata: string } {
@@ -107,7 +108,7 @@ function generateNextJSX(project: Project, settings: Settings): string {
       if (content.type === "text") {
         jsx += `        <div 
           className="content"
-          dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(content.value || "")}\` }}
+           dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(SecurityUtils.sanitizeHTML(content.value || ""))}\` }}
         />\n`
       } else if (content.type === "image") {
         jsx += `        <figure className="figure">
@@ -123,7 +124,7 @@ function generateNextJSX(project: Project, settings: Settings): string {
       } else if (content.type === "html") {
         jsx += `        <div 
           className="html-content"
-          dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(content.value || "")}\` }}
+           dangerouslySetInnerHTML={{ __html: \`${escapeBackticks(SecurityUtils.sanitizeHTML(content.value || ""))}\` }}
         />\n`
       }
     })

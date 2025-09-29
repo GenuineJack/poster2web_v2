@@ -4,34 +4,43 @@ import type { Metadata, Viewport } from "next"
 import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
-// Initialize fonts and assign them to constants (required by Next.js)
-const _v0GeistWeights = V0_Font_Geist({
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  subsets: ["latin"],
-})
 import { Geist, Geist_Mono, Geist as V0_Font_Geist, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
 
-// Initialize fonts
-V0_Font_Geist({ weight: ["100","200","300","400","500","600","700","800","900"] })
-V0_Font_IBM_Plex_Mono({ weight: ["100","200","300","400","500","600","700"] })
-V0_Font_Source_Serif_4({ weight: ["200","300","400","500","600","700","800","900"] })
-
+// Initialize additional font weight variants for the v0 components.
+//
+// When using Next.js font loaders, the loader functions must be called
+// at the module level and assigned to a constant.  See:
+// https://nextjs.org/docs/app/building-your-application/optimizing/fonts
+// These assignments ensure the font definitions are registered without
+// triggering build-time errors (they are prefixed with an underscore to
+// avoid unused-variable lint warnings).
+const _v0GeistWeights = V0_Font_Geist({
+  weight: [
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+  ],
+})
 const _v0IbmPlexWeights = V0_Font_IBM_Plex_Mono({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
-  subsets: ["latin"],
 })
 const _v0SourceSerifWeights = V0_Font_Source_Serif_4({
   weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-  subsets: ["latin"],
 })
 
-// Existing font declarations
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
   preload: true,
 })
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
