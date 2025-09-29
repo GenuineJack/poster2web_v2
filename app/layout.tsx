@@ -4,6 +4,11 @@ import type { Metadata, Viewport } from "next"
 import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
+const _v0GeistWeights = V0_Font_Geist({ weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] })
+const _v0IbmPlexWeights = V0_Font_IBM_Plex_Mono({ weight: ["100", "200", "300", "400", "500", "600", "700"] })
+const _v0SourceSerifWeights = V0_Font_Source_Serif_4({
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+})
 import { Geist, Geist_Mono, Geist as V0_Font_Geist, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
 
 // Initialize fonts
