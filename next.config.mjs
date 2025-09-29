@@ -17,8 +17,8 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    serverComponentsExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
   },
+  serverExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
   compress: true,
   poweredByHeader: false,
   webpack: (config, { isServer }) => {
