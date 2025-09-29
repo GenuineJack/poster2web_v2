@@ -17,17 +17,23 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+    serverComponentsExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
   },
   compress: true,
   poweredByHeader: false,
-  output: 'standalone',
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+      
       config.optimization.splitChunks = {
         ...config.optimization.splitChunks,
         cacheGroups: {
-          ...config.optimization.splitChunks.cacheGroups,
+          ...config.optimization.splitChunks?.cacheGroups,
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
@@ -66,10 +72,6 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;",
           },
         ],
       },
