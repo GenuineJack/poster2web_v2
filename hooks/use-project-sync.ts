@@ -6,16 +6,13 @@ import { database, appProjectToDatabaseProject } from "@/lib/database"
 import { toast } from "@/hooks/use-toast"
 
 export function useProjectSync(projectId: string) {
-  const { state, actions } = useAppState()
+  const { currentProject, settings, unsavedChanges, actions } = useAppState()
 
   const saveProject = useCallback(async () => {
-    if (!state.unsavedChanges) return
+    if (!unsavedChanges) return
 
     try {
-      const { project: dbProject, sections: dbSections } = appProjectToDatabaseProject(
-        state.currentProject,
-        state.settings,
-      )
+      const { project: dbProject, sections: dbSections } = appProjectToDatabaseProject(currentProject, settings)
 
       // Update project
       await database.updateProject(projectId, {
@@ -27,7 +24,7 @@ export function useProjectSync(projectId: string) {
       const existingSections = await database.getProjectSections(projectId)
 
       // Delete removed sections
-      const currentSectionIds = state.currentProject.sections.map((s) => s.id).filter(Boolean)
+      const currentSectionIds = currentProject.sections.map((s) => s.id).filter(Boolean)
       for (const existing of existingSections) {
         if (!currentSectionIds.includes(existing.id)) {
           await database.deleteSection(existing.id)
@@ -35,8 +32,8 @@ export function useProjectSync(projectId: string) {
       }
 
       // Update or create sections
-      for (let i = 0; i < state.currentProject.sections.length; i++) {
-        const section = state.currentProject.sections[i]
+      for (let i = 0; i < currentProject.sections.length; i++) {
+        const section = currentProject.sections[i]
         const dbSection = dbSections[i]
 
         if (section.id && existingSections.find((s) => s.id === section.id)) {
@@ -63,7 +60,7 @@ export function useProjectSync(projectId: string) {
         }
       }
 
-      actions.loadProject(state.currentProject) // This will clear unsavedChanges
+      actions.loadProject(currentProject) // This will clear unsavedChanges
       toast({
         title: "Saved",
         description: "Project saved successfully",
@@ -76,23 +73,23 @@ export function useProjectSync(projectId: string) {
         variant: "destructive",
       })
     }
-  }, [state.currentProject, state.settings, state.unsavedChanges, projectId, actions])
+  }, [currentProject, settings, unsavedChanges, projectId, actions])
 
   // Auto-save every 30 seconds if there are unsaved changes
   useEffect(() => {
-    if (!state.unsavedChanges) return
+    if (!unsavedChanges) return
 
     const interval = setInterval(() => {
       saveProject()
     }, 30000)
 
     return () => clearInterval(interval)
-  }, [state.unsavedChanges, saveProject])
+  }, [unsavedChanges, saveProject])
 
   // Save on page unload
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (state.unsavedChanges) {
+      if (unsavedChanges) {
         e.preventDefault()
         e.returnValue = ""
         saveProject()
@@ -101,7 +98,7 @@ export function useProjectSync(projectId: string) {
 
     window.addEventListener("beforeunload", handleBeforeUnload)
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [state.unsavedChanges, saveProject])
+  }, [unsavedChanges, saveProject])
 
   return { saveProject }
 }

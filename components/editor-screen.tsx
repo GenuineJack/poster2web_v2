@@ -15,7 +15,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 
 export function EditorScreen() {
-  const { state, actions } = useAppState()
+  const { currentProject, settings, ui, unsavedChanges, actions } = useAppState()
   const [showPreview, setShowPreview] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [projectId, setProjectId] = useState<string | null>(null)
@@ -44,7 +44,7 @@ export function EditorScreen() {
   }
 
   const toggleDarkMode = () => {
-    actions.updateSettings({ darkMode: !state.settings.darkMode })
+    actions.updateSettings({ darkMode: !settings.darkMode })
   }
 
   const handleSave = async () => {
@@ -78,14 +78,14 @@ export function EditorScreen() {
               <div>
                 <h1 className="text-xl font-bold">Poster2Web Editor</h1>
                 <p className="text-sm text-muted-foreground">
-                  {state.currentProject.title}
+                  {currentProject.title}
                   {isGuestMode && " (Guest Mode)"}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {!isGuestMode && state.unsavedChanges && (
+              {!isGuestMode && unsavedChanges && (
                 <Button variant="outline" onClick={handleSave} className="gap-2 bg-transparent">
                   <Save className="h-4 w-4" />
                   Save
@@ -110,7 +110,7 @@ export function EditorScreen() {
                 Export
               </Button>
               <Button variant="outline" size="icon" onClick={toggleDarkMode}>
-                {state.settings.darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {settings.darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -122,7 +122,7 @@ export function EditorScreen() {
         <div className="grid lg:grid-cols-2 gap-8 h-[calc(100vh-140px)]">
           {/* Left Panel - Editor */}
           <div className="space-y-6">
-            <Tabs value={state.ui.activeTab} onValueChange={(tab) => actions.setActiveTab(tab as any)}>
+            <Tabs value={ui.activeTab} onValueChange={(tab) => actions.setActiveTab(tab as any)}>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="content" className="gap-2">
                   📝 Content
@@ -161,7 +161,8 @@ export function EditorScreen() {
               {isGuestMode ? (
                 <div className="ml-auto text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">Guest Mode</div>
               ) : (
-                state.unsavedChanges && (
+                /* Updated to use unsavedChanges directly instead of state.unsavedChanges */
+                unsavedChanges && (
                   <div className="ml-auto text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Unsaved changes</div>
                 )
               )}

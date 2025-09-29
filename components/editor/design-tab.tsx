@@ -21,7 +21,7 @@ const colorSchemes = [
 ]
 
 export function DesignTab() {
-  const { state, actions } = useAppState()
+  const { settings, actions } = useAppState()
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "tablet" | "desktop">("desktop")
 
   const handleColorSchemeChange = (schemeId: string) => {
@@ -109,11 +109,11 @@ export function DesignTab() {
               <div className="flex items-center gap-2 mt-1">
                 <input
                   type="color"
-                  value={state.settings.primaryColor}
+                  value={settings.primaryColor}
                   onChange={(e) => handleSettingChange("primaryColor", e.target.value)}
                   className="w-8 h-8 rounded border"
                 />
-                <span className="text-sm font-mono">{state.settings.primaryColor}</span>
+                <span className="text-sm font-mono">{settings.primaryColor}</span>
               </div>
             </div>
             <div>
@@ -121,11 +121,11 @@ export function DesignTab() {
               <div className="flex items-center gap-2 mt-1">
                 <input
                   type="color"
-                  value={state.settings.secondaryColor}
+                  value={settings.secondaryColor}
                   onChange={(e) => handleSettingChange("secondaryColor", e.target.value)}
                   className="w-8 h-8 rounded border"
                 />
-                <span className="text-sm font-mono">{state.settings.secondaryColor}</span>
+                <span className="text-sm font-mono">{settings.secondaryColor}</span>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@ export function DesignTab() {
         <CardContent className="space-y-4">
           <div>
             <Label>Font Style</Label>
-            <Select value={state.settings.fontStyle} onValueChange={(value) => handleSettingChange("fontStyle", value)}>
+            <Select value={settings.fontStyle} onValueChange={(value) => handleSettingChange("fontStyle", value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -156,9 +156,9 @@ export function DesignTab() {
           </div>
 
           <div>
-            <Label>Title Size: {state.settings.titleSize}px</Label>
+            <Label>Title Size: {settings.titleSize}px</Label>
             <Slider
-              value={[Number.parseInt(state.settings.titleSize)]}
+              value={[Number.parseInt(settings.titleSize)]}
               onValueChange={([value]) => handleSettingChange("titleSize", value.toString())}
               min={24}
               max={72}
@@ -168,9 +168,9 @@ export function DesignTab() {
           </div>
 
           <div>
-            <Label>Content Size: {state.settings.contentSize}px</Label>
+            <Label>Content Size: {settings.contentSize}px</Label>
             <Slider
-              value={[Number.parseInt(state.settings.contentSize)]}
+              value={[Number.parseInt(settings.contentSize)]}
               onValueChange={([value]) => handleSettingChange("contentSize", value.toString())}
               min={12}
               max={24}
@@ -192,10 +192,7 @@ export function DesignTab() {
         <CardContent className="space-y-4">
           <div>
             <Label>Layout Style</Label>
-            <Select
-              value={state.settings.layoutStyle}
-              onValueChange={(value) => handleSettingChange("layoutStyle", value)}
-            >
+            <Select value={settings.layoutStyle} onValueChange={(value) => handleSettingChange("layoutStyle", value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -210,7 +207,7 @@ export function DesignTab() {
           <div>
             <Label>Header Alignment</Label>
             <Select
-              value={state.settings.headerAlignment}
+              value={settings.headerAlignment}
               onValueChange={(value) => handleSettingChange("headerAlignment", value)}
             >
               <SelectTrigger>
@@ -225,9 +222,9 @@ export function DesignTab() {
           </div>
 
           <div>
-            <Label>Logo Size: {state.settings.logoSize}px</Label>
+            <Label>Logo Size: {settings.logoSize}px</Label>
             <Slider
-              value={[Number.parseInt(state.settings.logoSize)]}
+              value={[Number.parseInt(settings.logoSize)]}
               onValueChange={([value]) => handleSettingChange("logoSize", value.toString())}
               min={60}
               max={200}

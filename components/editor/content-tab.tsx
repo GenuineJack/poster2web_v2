@@ -11,7 +11,7 @@ import { AddSectionDialog } from "./add-section-dialog"
 import { cn } from "@/lib/utils"
 
 export function ContentTab() {
-  const { state, actions } = useAppState()
+  const { currentProject, ui, actions } = useAppState()
   const [editingSection, setEditingSection] = useState<number | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
 
@@ -32,7 +32,7 @@ export function ContentTab() {
   }
 
   const handleDuplicateSection = (index: number) => {
-    const section = state.currentProject.sections[index]
+    const section = currentProject.sections[index]
     const duplicated = {
       ...section,
       id: `${section.id}-copy-${Date.now()}`,
@@ -62,8 +62,8 @@ export function ContentTab() {
       {/* Sections List */}
       <ScrollArea className="h-[calc(100vh-300px)]">
         <div className="space-y-3">
-          {state.currentProject.sections.map((section, index) => {
-            const isExpanded = state.ui.expandedSections.has(section.id)
+          {currentProject.sections.map((section, index) => {
+            const isExpanded = ui.expandedSections.has(section.id)
             const isEditing = editingSection === index
 
             return (
@@ -173,7 +173,7 @@ export function ContentTab() {
             )
           })}
 
-          {state.currentProject.sections.length === 0 && (
+          {currentProject.sections.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">

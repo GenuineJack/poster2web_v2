@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { useAppState } from "@/hooks/use-app-state"
 
 export function SettingsTab() {
-  const { state, actions } = useAppState()
+  const { currentProject, settings, actions } = useAppState()
   const [newButton, setNewButton] = useState({
     type: "link" as "file" | "link" | "email",
     label: "",
@@ -26,7 +26,7 @@ export function SettingsTab() {
         ...newButton,
       }
       actions.updateSettings({
-        buttons: [...state.settings.buttons, button],
+        buttons: [...settings.buttons, button],
       })
       setNewButton({ type: "link", label: "", value: "" })
     }
@@ -34,7 +34,7 @@ export function SettingsTab() {
 
   const handleDeleteButton = (buttonId: string) => {
     actions.updateSettings({
-      buttons: state.settings.buttons.filter((b) => b.id !== buttonId),
+      buttons: settings.buttons.filter((b) => b.id !== buttonId),
     })
   }
 
@@ -68,7 +68,7 @@ export function SettingsTab() {
             <Label htmlFor="project-title">Project Title</Label>
             <Input
               id="project-title"
-              value={state.currentProject.title}
+              value={currentProject.title}
               onChange={(e) => actions.updateProject({ title: e.target.value })}
               placeholder="My Website"
             />
@@ -78,7 +78,7 @@ export function SettingsTab() {
             <Label htmlFor="logo-url">Logo URL</Label>
             <Input
               id="logo-url"
-              value={state.currentProject.logoUrl || ""}
+              value={currentProject.logoUrl || ""}
               onChange={(e) => actions.updateProject({ logoUrl: e.target.value })}
               placeholder="https://example.com/logo.png"
             />
@@ -87,7 +87,7 @@ export function SettingsTab() {
           <div className="flex items-center space-x-2">
             <Switch
               id="dark-mode"
-              checked={state.settings.darkMode}
+              checked={settings.darkMode}
               onCheckedChange={(checked) => handleSettingChange("darkMode", checked)}
             />
             <Label htmlFor="dark-mode">Dark Mode</Label>
@@ -103,9 +103,9 @@ export function SettingsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Existing Buttons */}
-          {state.settings.buttons.length > 0 && (
+          {settings.buttons.length > 0 && (
             <div className="space-y-2">
-              {state.settings.buttons.map((button) => (
+              {settings.buttons.map((button) => (
                 <div key={button.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                   {getButtonIcon(button.type)}
                   <div className="flex-1">
@@ -189,7 +189,7 @@ export function SettingsTab() {
             <Label htmlFor="analytics-code">Analytics Code</Label>
             <Textarea
               id="analytics-code"
-              value={state.settings.analyticsCode}
+              value={settings.analyticsCode}
               onChange={(e) => handleSettingChange("analyticsCode", e.target.value)}
               placeholder=" Google Analytics or other tracking code "
               rows={4}
