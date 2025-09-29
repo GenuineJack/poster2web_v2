@@ -1,4 +1,43 @@
+import DOMPurify from "isomorphic-dompurify"
+
 export class SecurityUtils {
+  static sanitizeHTML(html: string): string {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [
+        "p",
+        "br",
+        "strong",
+        "em",
+        "u",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "ul",
+        "ol",
+        "li",
+        "a",
+        "img",
+        "blockquote",
+        "code",
+        "pre",
+        "span",
+        "div",
+        "table",
+        "thead",
+        "tbody",
+        "tr",
+        "th",
+        "td",
+      ],
+      ALLOWED_ATTR: ["href", "src", "alt", "title", "class", "id", "target", "rel"],
+      ALLOW_DATA_ATTR: false,
+      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+    })
+  }
+
   // Sanitize user input to prevent XSS
   static sanitizeInput(input: string): string {
     return input
@@ -50,18 +89,18 @@ export class SecurityUtils {
     }
   }
 
-  // Content Security Policy headers
   static getCSPHeader(): string {
     return [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      "upgrade-insecure-requests",
     ].join("; ")
   }
 }

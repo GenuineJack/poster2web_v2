@@ -9,6 +9,7 @@ import { useAppState } from "@/hooks/use-app-state"
 import { SectionEditor } from "./section-editor"
 import { AddSectionDialog } from "./add-section-dialog"
 import { cn } from "@/lib/utils"
+import { SecurityUtils } from "@/lib/security-utils"
 
 export function ContentTab() {
   const { currentProject, ui, actions } = useAppState()
@@ -144,7 +145,7 @@ export function ContentTab() {
                             {content.type === "text" && (
                               <div
                                 className="prose prose-sm max-w-none"
-                                dangerouslySetInnerHTML={{ __html: content.value || "" }}
+                                dangerouslySetInnerHTML={{ __html: SecurityUtils.sanitizeHTML(content.value || "") }}
                               />
                             )}
                             {content.type === "image" && (
@@ -160,7 +161,7 @@ export function ContentTab() {
                             {content.type === "html" && (
                               <div
                                 className="prose prose-sm max-w-none"
-                                dangerouslySetInnerHTML={{ __html: content.value || "" }}
+                                dangerouslySetInnerHTML={{ __html: SecurityUtils.sanitizeHTML(content.value || "") }}
                               />
                             )}
                           </div>
