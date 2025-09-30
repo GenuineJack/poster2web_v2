@@ -1,5 +1,7 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
+/* The tw-animate-css package has been removed. Remove the import to avoid
+   resolving a missing module during the build. Tailwind's built-in classes
+   or the tailwindcss-animate plugin can be used for animations instead. */
 
 @custom-variant dark (&:is(.dark *));
 
