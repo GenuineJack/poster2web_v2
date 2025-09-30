@@ -64,7 +64,8 @@ export function ContentTab() {
       <ScrollArea className="h-[calc(100vh-300px)]">
         <div className="space-y-3">
           {currentProject.sections.map((section, index) => {
-            const isExpanded = ui.expandedSections.has(section.id)
+            // expandedSections is a string[]; use includes() instead of .has()
+            const isExpanded = ui.expandedSections.includes(section.id)
             const isEditing = editingSection === index
 
             return (
