@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, User } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+export const runtime = 'nodejs';
 
 export default function UploadPage() {
   const router = useRouter()
