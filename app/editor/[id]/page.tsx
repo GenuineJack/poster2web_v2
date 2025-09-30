@@ -4,6 +4,12 @@ import { serverDatabase } from "@/lib/server-database"
 import { databaseProjectToAppProject } from "@/lib/database"
 import { EditorWrapper } from "@/components/editor-wrapper"
 
+// This page uses server-side Supabase functions, which rely on Node.js APIs.
+// Set the runtime to 'nodejs' so that Vercel deploys this route on the Node runtime
+// instead of the default Edge runtime. Without this, the build may warn about
+// unsupported Node APIs in the Edge environment.
+export const runtime = 'nodejs';
+
 interface EditorPageProps {
   params: Promise<{ id: string }>
 }

@@ -1,4 +1,3 @@
-export const runtime = 'nodejs';
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { hasValidSupabaseConfig } from "@/lib/env-validation"
@@ -6,6 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { DashboardClient } from "@/components/dashboard-client"
+
+// This page uses server-side Supabase functions, which rely on Node.js APIs.
+// Specify the Node runtime so that Vercel executes it on Node instead of Edge.
+export const runtime = 'nodejs';
 
 export default async function DashboardPage() {
   try {

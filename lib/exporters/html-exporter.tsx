@@ -1,5 +1,6 @@
 import type { Project, Settings } from "@/hooks/use-app-state"
 import { generateSEOMetadata } from "@/lib/content-analyzer"
+import { SecurityUtils } from "@/lib/security-utils"
 
 export function exportToHTML(project: Project, settings: Settings): string {
   const allContent = project.sections.map((section) => section.content.map((c) => c.value || "").join(" ")).join(" ")
@@ -262,14 +263,16 @@ function generateHTML(project: Project, settings: Settings): string {
 
     section.content.forEach((content) => {
       if (content.type === "text") {
-        html += `    ${content.value}\n`
+        // Sanitize any user-provided or converted Markdown HTML to prevent XSS.
+        html += `    ${SecurityUtils.sanitizeHTML(content.value || "")}\n`
       } else if (content.type === "image") {
         html += `    <figure>
         <img src="${content.url}" alt="${content.caption || ""}" />
         ${content.caption ? `<figcaption>${content.caption}</figcaption>` : ""}
     </figure>\n`
       } else if (content.type === "html") {
-        html += `    ${content.value}\n`
+        // Sanitize raw HTML content before inlining it.
+        html += `    ${SecurityUtils.sanitizeHTML(content.value || "")}\n`
       }
     })
 

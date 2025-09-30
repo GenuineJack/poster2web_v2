@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, User } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-export const runtime = 'nodejs';
 
 export default function UploadPage() {
   const router = useRouter()
@@ -37,9 +36,13 @@ export default function UploadPage() {
           throw new Error("Failed to process file - no content extracted")
         }
 
+        // Provide an empty string for logoUrl so that the object matches
+        // the Project type definition. This prevents TypeScript errors
+        // complaining about the required `logoUrl` property.
         actions.loadProject({
           title: file.name.replace(/\.[^/.]+$/, "") || "My Website",
           sections: result,
+          logoUrl: "",
         })
 
         actions.setLoading(false)
